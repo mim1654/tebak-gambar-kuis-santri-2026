@@ -34,4 +34,34 @@ export function Artwork({name,size=112}:{name:string;size?:number}) {
  };
  return <svg role="img" aria-label={`Ilustrasi ${name}`} viewBox="0 0 120 120" width={size} height={size} style={{overflow:'visible'}}><ellipse cx="60" cy="108" rx="40" ry="5" fill="#10263a" opacity=".12"/><g filter="drop-shadow(0 4px 2px #10263a18)">{shapes[key]||shapes.kitab}</g></svg>;
 }
-export function Mascot({girl=false,pose='wave'}:{girl?:boolean;pose?:'wave'|'think'|'celebrate'|'rest'}) { return <svg className="mascot" role="img" aria-label={girl?'Maskot santri perempuan berhijab':'Maskot santri laki-laki berpeci'} viewBox="0 0 180 205"><ellipse cx="90" cy="190" rx="48" ry="8" fill="#10263a" opacity=".12"/><path d="M53 116Q90 97 127 116L138 177H42Z" fill={girl?'#1f8a5b':'#fff6df'} stroke={girl?'#176c47':'#e6d9b8'} strokeWidth="2"/><path d="M55 132L30 154M125 132L148 148" stroke={girl?'#1f8a5b':'#fff6df'} strokeWidth="16" strokeLinecap="round"/><circle cx="90" cy="74" r="39" fill="#e8b08a"/><path d={girl?'M50 72Q44 22 90 22Q136 22 130 75L119 112L61 112Z':'M52 65Q51 27 90 27Q129 27 128 65L116 48H64Z'} fill={girl?'#c8553d':'#17212b'}/>{girl&&<path d="M54 61Q37 99 56 133L90 149L124 133Q143 99 126 61Q122 109 90 112Q58 109 54 61Z" fill="#c8553d"/>}{!girl&&<path d="M52 60Q90 45 128 60L121 47H59Z" fill="#17212b"/>}<circle cx="76" cy="75" r="3.4" fill="#10263a"/><circle cx="104" cy="75" r="3.4" fill="#10263a"/><path d="M77 91Q90 102 103 91" fill="none" stroke="#9e5141" strokeWidth="3.5" strokeLinecap="round"/>{!girl&&<path d="M73 112L90 126L107 112" fill="#2f7fc1"/>}<path d={pose==='think'?'M120 130L143 110':pose==='celebrate'?'M124 130L146 105':pose==='rest'?'M124 139L143 151':'M124 130L146 116'} stroke="#e8b08a" strokeWidth="13" strokeLinecap="round"/><circle cx="145" cy={pose==='rest'?151:pose==='think'?108:pose==='celebrate'?103:114} r="8" fill="#e8b08a"/>{pose==='celebrate'&&<g fill="#f2c14e"><path d="M145 46l4 10 10 4-10 4-4 10-4-10-10-4 10-4Z"/><path d="M34 70l3 7 7 3-7 3-3 7-3-7-7-3 7-3Z"/></g>}</svg>; }
+export function Mascot({girl=false,pose='wave'}:{girl?:boolean;pose?:'wave'|'think'|'celebrate'|'rest'}) {
+ const id=React.useId().replace(/:/g,'');
+ const skin=`skin-${id}`, cloth=`cloth-${id}`, scarf=`scarf-${id}`;
+ const arm=pose==='rest'?'M124 139L143 151':pose==='think'?'M124 130L143 110':pose==='celebrate'?'M124 130L146 105':'M124 130L146 116';
+ return <svg className="mascot" role="img" aria-label={girl?'Santriwati memakai hijab hijau':'Santri memakai peci dan baju koko'} viewBox="0 0 180 205" focusable="false">
+  <defs>
+   <linearGradient id={skin} x1="0" y1="0" x2="1" y2="1"><stop stopColor="#f5c59f"/><stop offset=".55" stopColor="#e4a77f"/><stop offset="1" stopColor="#c88061"/></linearGradient>
+   <linearGradient id={cloth} x1="0" y1="0" x2="1" y2="1"><stop stopColor={girl?'#42a77d':'#fff9eb'}/><stop offset="1" stopColor={girl?'#176747':'#e5dac0'}/></linearGradient>
+   <linearGradient id={scarf} x1="0" y1="0" x2="1" y2="1"><stop stopColor="#e5795c"/><stop offset="1" stopColor="#a83f34"/></linearGradient>
+  </defs>
+  <ellipse cx="90" cy="190" rx="48" ry="8" fill="#10263a" opacity=".12"/>
+  <path d="M53 116Q90 99 127 116l11 61H42z" fill={`url(#${cloth})`} stroke={girl?'#176747':'#d8cba9'} strokeWidth="2"/>
+  <path d="M58 128q-5 27-7 45m70-45q5 27 7 45" fill="none" stroke={girl?'#176747':'#dfd2b1'} strokeWidth="2" opacity=".7"/>
+  <path d="M54 132 31 153m71-17 27 13" stroke={girl?'#287d5d':'#f7f1e4'} strokeWidth="16" strokeLinecap="round"/>
+  <circle cx="31" cy="153" r="8" fill={`url(#${skin})`}/>
+  <circle cx="148" cy="149" r="8" fill={`url(#${skin})`}/>
+  <circle cx="90" cy="73" r="39" fill={`url(#${skin})`}/>
+  <path d={girl?'M51 70Q46 21 90 21Q134 21 129 70L123 111Q107 139 90 145Q73 139 57 111Z':'M52 64Q50 26 90 26Q130 26 128 64L118 51H62Z'} fill={girl?'#247657':'#111a20'}/>
+  {girl&&<path d="M53 55Q43 89 51 122L69 145 90 154 111 145 129 122Q137 88 127 55Q121 107 90 113Q59 107 53 55Z" fill={`url(#${scarf})`} stroke="#963c32" strokeWidth="2"/>}
+  {!girl&&<><path d="M50 59Q90 43 130 59L124 48H56Z" fill="#111a20"/><path d="M65 42Q90 31 115 42" fill="none" stroke="#43515a" strokeWidth="2"/></>}
+  <path d="M63 69q8-7 16 0m22 0q8-7 16 0" fill="none" stroke="#704b3e" strokeWidth="2" strokeLinecap="round"/>
+  <ellipse cx="76" cy="77" rx="4" ry="5" fill="#172b32"/><ellipse cx="104" cy="77" rx="4" ry="5" fill="#172b32"/>
+  <circle cx="77" cy="75" r="1.3" fill="#fff"/><circle cx="105" cy="75" r="1.3" fill="#fff"/>
+  <path d="M88 80q-4 8 1 9" fill="none" stroke="#bd795c" strokeWidth="2" strokeLinecap="round"/>
+  <path d="M77 96q13 10 26 0" fill="none" stroke="#914b43" strokeWidth="3" strokeLinecap="round"/>
+  <path d={girl?'M76 114 90 123 104 114':'M74 114 90 128 106 114'} fill={girl?'#f2c14e':'#3787aa'}/>
+  <path d={arm} stroke={`url(#${skin})`} strokeWidth="13" strokeLinecap="round"/>
+  <circle cx={pose==='rest'?143:pose==='think'?143:pose==='celebrate'?146:146} cy={pose==='rest'?151:pose==='think'?108:pose==='celebrate'?103:114} r="8" fill={`url(#${skin})`}/>
+  {pose==='celebrate'&&<g fill="#f2c14e"><path d="M145 46l4 10 10 4-10 4-4 10-4-10-10-4 10-4Z"/><path d="M34 70l3 7 7 3-7 3-3 7-3-7-7-3 7-3Z"/></g>}
+ </svg>;
+}

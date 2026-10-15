@@ -37,7 +37,6 @@ export function Artwork({name,size=112}:{name:string;size?:number}) {
 export function Mascot({girl=false,pose='wave'}:{girl?:boolean;pose?:'wave'|'think'|'celebrate'|'rest'}) {
  const id=React.useId().replace(/:/g,'');
  const skin='skin-'+id, cloth='cloth-'+id, scarf='scarf-'+id;
- const handsTogether=pose==='wave'||pose==='rest';
  const faceY=girl?73:69;
  return <svg className="mascot" role="img" aria-label={girl?'Santriwati berhijab merah muda':'Santri kecil memakai peci putih'} viewBox="0 0 180 205" focusable="false">
   <defs>

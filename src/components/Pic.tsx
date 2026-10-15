@@ -1,21 +1,6 @@
 import type { ReactNode } from 'react';
 import { RealisticPic } from './RealisticPic';
 
-const S = ({ children, size, label }: { children: ReactNode; size: number; label: string }) => (
-  <svg role="img" aria-label={label} viewBox="0 0 120 120" width={size} height={size}>
-    <defs>
-      <linearGradient id="gGreen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#35b27c" /><stop offset="1" stopColor="#157047" /></linearGradient>
-      <linearGradient id="gBlue" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#5aa6e6" /><stop offset="1" stopColor="#245f94" /></linearGradient>
-      <linearGradient id="gGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#ffe08a" /><stop offset="1" stopColor="#e0a526" /></linearGradient>
-      <linearGradient id="gRed" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#e2745b" /><stop offset="1" stopColor="#a63b28" /></linearGradient>
-      <linearGradient id="gBrown" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#c58a4d" /><stop offset="1" stopColor="#7a4d22" /></linearGradient>
-      <linearGradient id="gDark" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#3a4654" /><stop offset="1" stopColor="#10181f" /></linearGradient>
-    </defs>
-    <ellipse cx="60" cy="108" rx="38" ry="5" fill="#10263a" opacity=".14" />
-    {children}
-  </svg>
-);
-
 const art: Record<string, { label: string; draw: ReactNode }> = {
   peci: { label: 'Peci hitam', draw: <>
     <path d="M24 78 Q22 40 60 36 Q98 40 96 78 Q96 90 60 90 Q24 90 24 78Z" fill="url(#gDark)" />

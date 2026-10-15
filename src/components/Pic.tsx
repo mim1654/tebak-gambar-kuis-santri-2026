@@ -97,7 +97,6 @@ const art: Record<string, { label: string; draw: ReactNode }> = {
 
 const emoji: Record<string, string> = {
   // perilaku baik
-  'b01': '🤝', 'b02': '🧹', 'b03': '🗑️', 'b04': '👂', 'b05': '🧍‍♂️', 'b06': '📚',
   // urutan
   'steps-book': '📚', 'steps-hands': '🧼', 'steps-prayer': '🕌', 'steps-clean': '🧽', 'steps-library': '🏫', 'steps-help': '🤝',
   // lain-lain
@@ -117,15 +116,25 @@ const stepEmoji: Record<string, string> = {
 
 export const emojiForStep = (s: string) => stepEmoji[s] ?? '🔹';
 
+const behaviorArt: Record<string, ReactNode> = {
+  b01: <><circle cx="36" cy="36" r="12" fill="#e9b18e"/><path d="M22 55q14-10 28 0l5 38H18z" fill="#3d84b8"/><circle cx="83" cy="36" r="12" fill="#d99b73"/><path d="M69 55q14-10 28 0l5 38H65z" fill="#30936e"/><path d="M47 64l23 8" stroke="#e9b18e" strokeWidth="8" strokeLinecap="round"/><rect x="45" y="68" width="28" height="19" rx="2" fill="#b56e49" stroke="#71452f" strokeWidth="2"/><path d="M59 69v17" stroke="#f2dfb4" strokeWidth="2"/></>,
+  b02: <><rect x="20" y="66" width="80" height="29" rx="5" fill="#c58d52"/><path d="M29 65V91M91 65V91" stroke="#805a39" strokeWidth="4"/><rect x="30" y="43" width="28" height="21" rx="2" fill="#e8d8b7" stroke="#997d51" strokeWidth="2"/><path d="M35 49h17m-17 5h17" stroke="#8a795c" strokeWidth="2"/><rect x="64" y="49" width="25" height="15" rx="2" fill="#4587ad"/><path d="M69 54h15m-15 5h12" stroke="#e9f2ee" strokeWidth="2"/></>,
+  b03: <><path d="M20 35h38l-4 57H24z" fill="#4b8fa4" stroke="#276276" strokeWidth="3"/><path d="M17 33h44M29 27h21" stroke="#276276" strokeWidth="4" strokeLinecap="round"/><path d="M73 31l12 7-7 11-12-7zm15 27 12 6-7 12-12-6z" fill="#d99c58" stroke="#9c6b36" strokeWidth="2"/><path d="M75 74q9 6 14 0" fill="none" stroke="#3b805f" strokeWidth="4" strokeLinecap="round"/></>,
+  b04: <><circle cx="48" cy="44" r="18" fill="#e8b08a"/><path d="M30 41q2-22 20-22 19 0 20 22L61 35H36z" fill="#17212b"/><path d="M29 68q19-14 38 0l7 34H22z" fill="#3b82b5"/><circle cx="43" cy="45" r="2" fill="#10263a"/><circle cx="54" cy="45" r="2" fill="#10263a"/><path d="M77 22h25q7 0 7 7v19q0 7-7 7H89l-8 8v-8h-4q-7 0-7-7V29q0-7 7-7z" fill="#fff6df" stroke="#c9aa68" strokeWidth="2"/><circle cx="84" cy="38" r="2" fill="#826d4c"/><circle cx="92" cy="38" r="2" fill="#826d4c"/><circle cx="100" cy="38" r="2" fill="#826d4c"/></>,
+  b05: <><path d="M17 90h86" stroke="#d2b36b" strokeWidth="3" strokeDasharray="5 5"/><g><circle cx="31" cy="35" r="11" fill="#e8b08a"/><path d="M18 52q13-9 26 0l4 37H15z" fill="#347eae"/><circle cx="62" cy="35" r="11" fill="#d99b73"/><path d="M49 52q13-9 26 0l4 37H46z" fill="#26835d"/><circle cx="91" cy="35" r="11" fill="#e8b08a"/><path d="M78 52q13-9 26 0l4 37H75z" fill="#c7764c"/></g></>,
+  b06: <><rect x="21" y="24" width="78" height="75" rx="4" fill="#c48d54" stroke="#805b37" strokeWidth="3"/><path d="M20 57h80M20 82h80" stroke="#805b37" strokeWidth="4"/><path d="M29 31h11v23H29zm15-3h12v26H44zm18 5h12v21H62zm18-2h13v23H80zM28 62h12v17H28zm17 2h13v15H45zm18-3h11v18H63zm17 2h13v16H80zm-51 23h12v11H29zm17-3h13v14H46zm18 1h13v13H64z" fill="#477f9a" stroke="#315a70" strokeWidth="1.5"/></>
+};
+
 export const picKey = (label: string) => {
   const k = label.trim().toLowerCase().replace(/^kitab atau buku$/, 'kitab');
-  return art[k] || emoji[k] ? k : '';
+  return art[k] || emoji[k] || behaviorArt[k] ? k : '';
 };
 
 export function Pic({ name, size = 112 }: { name: string; size?: number }) {
   const k = name.toLowerCase();
   if (art[k]) return <RealisticPic name={k} size={size} />;
   const key = k.replace(/^odd-.*/, 'search');
+  if (behaviorArt[k]) return <svg role="img" aria-label={{b01:'Anak membantu teman membawa buku',b02:'Merapikan alat belajar di atas meja',b03:'Membuang sampah ke tempat sampah',b04:'Mendengarkan teman berbicara',b05:'Anak-anak menunggu giliran dalam antrean',b06:'Buku tersusun rapi di rak'}[k]} viewBox="0 0 120 120" width={size} height={size} focusable="false"><rect x="4" y="4" width="112" height="112" rx="18" fill="#f4ecdb"/><ellipse cx="60" cy="103" rx="35" ry="5" fill="#203d42" opacity=".14"/>{behaviorArt[k]}</svg>;
   const e = emoji[k] || emoji[key];
   if (e) return <span role="img" aria-label={name} style={{ fontSize: size * 0.72, lineHeight: 1, display: 'inline-block', width: size, height: size, textAlign: 'center' }}>{e}</span>;
   return null;

@@ -8,7 +8,7 @@ Aplikasi web edukasi statis berbahasa Indonesia untuk kegiatan Hari Santri Nasio
 - 36 aktivitas lokal yang terbagi menjadi enam mode.
 - Pengaturan guru ber-PIN lokal (awal `1234`), mode kelompok, skor opsional, tingkat kesulitan, jumlah soal, percobaan ulang, dan pengaturan aksesibilitas.
 - Ekspor/impor pengaturan JSON dengan validasi tipe dasar.
-- Mode tenang, kontras tinggi, ukuran teks, text-to-speech bila didukung, fokus keyboard, dan target sentuh besar.
+- Mode tenang, kontras tinggi, ukuran teks, text-to-speech bila didukung, fokus keyboard, dan target sentuh besar. Tidak ada batas waktu bawaan agar peserta dapat menjawab dengan tenang.
 - PWA/service worker untuk menyimpan aset aplikasi inti setelah kunjungan pertama.
 - Tidak ada backend, iklan, analitik, akun, atau pengiriman hasil permainan.
 
@@ -80,7 +80,7 @@ Service worker didaftarkan pada build produksi dan menyimpan aset inti setelah k
 - Pengaturan timer hanya tersimpan sebagai preferensi; timer tidak diterapkan pada permainan.
 - Musik latar tidak disertakan; toggle musik disimpan untuk pengembangan lanjutan, tetapi tidak memutar musik.
 - Opsi lanjut otomatis disimpan, tetapi sesi saat ini menggunakan tombol lanjut manual agar peserta didik memiliki waktu respons.
-- Pemilihan tim dan pergiliran tersedia; skor pada versi ini berupa skor sesi gabungan, bukan papan skor terpisah untuk masing-masing tim.
+- Pemilihan tim dan pergiliran tersedia. Skor tetap berupa skor sesi gabungan, bukan papan skor terpisah untuk masing-masing tim.
 - Bank soal mode sejarah ditandai perlu ditinjau oleh guru.
 
 ## Lisensi

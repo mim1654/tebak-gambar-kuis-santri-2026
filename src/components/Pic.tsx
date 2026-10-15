@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { RealisticPic } from './RealisticPic';
 
 const S = ({ children, size, label }: { children: ReactNode; size: number; label: string }) => (
   <svg role="img" aria-label={label} viewBox="0 0 120 120" width={size} height={size}>
@@ -138,7 +139,7 @@ export const picKey = (label: string) => {
 
 export function Pic({ name, size = 112 }: { name: string; size?: number }) {
   const k = name.toLowerCase();
-  if (art[k]) return <S size={size} label={art[k].label}>{art[k].draw}</S>;
+  if (art[k]) return <RealisticPic name={k} size={size} />;
   const key = k.replace(/^odd-.*/, 'search');
   const e = emoji[k] || emoji[key];
   if (e) return <span role="img" aria-label={name} style={{ fontSize: size * 0.72, lineHeight: 1, display: 'inline-block', width: size, height: size, textAlign: 'center' }}>{e}</span>;

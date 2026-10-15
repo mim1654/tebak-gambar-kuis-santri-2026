@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { useId, type ReactNode } from 'react';
 
 const labels: Record<string, string> = {
   peci: 'Peci hitam', sarung: 'Sarung bermotif kotak', sajadah: 'Sajadah hijau',
@@ -22,7 +22,7 @@ export function RealisticPic({ name, size = 112 }: { name: string; size?: number
   const goldFill = `url(#${gold})`;
   const inkFill = `url(#${ink})`;
 
-  let object;
+  let object: ReactNode;
   switch (name) {
     case 'peci':
       object = <><path d="M26 64c0-24 15-42 34-42s34 18 34 42v18H26z" fill={inkFill}/><path d="M26 64c11 8 23 12 34 12s23-4 34-12v13c-17 12-51 12-68 0z" fill="#05090d"/><path d="M33 58c4-17 13-27 27-29" fill="none" stroke="#73808a" strokeWidth="3" strokeLinecap="round" opacity=".52"/><path d="M31 72c16 8 42 8 58 0" fill="none" stroke="#38434d" strokeWidth="2"/></>;

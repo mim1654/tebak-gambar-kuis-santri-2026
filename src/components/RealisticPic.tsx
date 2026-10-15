@@ -34,7 +34,21 @@ export function RealisticPic({ name, size = 112 }: { name: string; size?: number
       object = <><path d="M28 20h64v78l-6 9H34l-6-9z" fill={clothFill}/><path d="M35 27h50v67H35z" fill="none" stroke="#e9c574" strokeWidth="2.5"/><path d="M42 89V53q18-30 36 0v36" fill="#15573f" stroke="#e9c574" strokeWidth="2"/><path d="M45 51q15-25 30 0M41 94h38" fill="none" stroke="#f5d98c" strokeWidth="2"/><path d="M32 102l-5 7m13-7-2 8m13-8v8m13-8 2 8m12-8 5 7m4-7 6 6" stroke="#d6b45e" strokeWidth="2" strokeLinecap="round"/></>;
       break;
     case 'masjid':
-      object = <><path d="M23 56h74v43H23z" fill="#f0e6d2" stroke="#b89a68" strokeWidth="2"/><path d="M42 56q18-42 36 0z" fill={clothFill}/><path d="M59 14v-6m0 0 5 5h-5" fill="none" stroke="#d2a84c" strokeWidth="2"/><path d="M54 99V78q5-12 10 0v21" fill="#28556d"/><path d="M10 44h12v55H10zm78 0h12v55H88z" fill="#eee1c4" stroke="#b89a68" strokeWidth="2"/><path d="M8 44l8-17 8 17m62 0 8-17 8 17" fill={goldFill} stroke="#b89a68" strokeWidth="1.5"/><path d="M12 63h8m70 0h8" stroke="#8eb3c0" strokeWidth="3"/><path d="M25 58h70" stroke="#d2b577" strokeWidth="2"/></>;
+      object = <>
+        <path d="M21 58h78v41H21z" fill="#e9ddc5" stroke="#947b58" strokeWidth="2"/>
+        <path d="M25 61h70v5H25z" fill="#c5a97a"/>
+        <path d="M39 57q21-46 42 0z" fill={clothFill} stroke="#1d5a4d" strokeWidth="1.5"/>
+        <path d="M47 46q13-30 26 0m-22 7q9-22 18 0" fill="none" stroke="#a8c4a5" strokeWidth="1.5" opacity=".65"/>
+        <path d="M59 13v-5m0 0 5 5h-5" fill="none" stroke="#b88c3d" strokeWidth="2.5"/>
+        <path d="M54 99V78q6-14 12 0v21z" fill="#244c60" stroke="#d9cba9" strokeWidth="2"/>
+        <path d="M12 41h12v58H12zm84 0h12v58H96z" fill="#f0e7d5" stroke="#947b58" strokeWidth="2"/>
+        <path d="M10 41l8-17 8 17m68 0 8-17 8 17" fill={goldFill} stroke="#947b58" strokeWidth="1.5"/>
+        <path d="M14 51h8m76 0h8" stroke="#b89152" strokeWidth="2"/>
+        <path d="M15 61h6m76 0h6m-88 26h6m76 0h6" stroke="#7fa6ad" strokeWidth="3" strokeLinecap="round"/>
+        <path d="M31 73v12m58-12v12" stroke="#c8b38e" strokeWidth="1.5"/>
+        <path d="M29 98V84q5-10 10 0v14m42 0V84q5-10 10 0v14" fill="#527a7c" stroke="#b79d6d" strokeWidth="1.5"/>
+        <path d="M23 58h74" stroke="#d2b577" strokeWidth="2"/>
+      </>;
       break;
     case 'pesantren':
       object = <><path d="M20 48 60 22l40 26v50H20z" fill="#dfc28d" stroke="#a8834e" strokeWidth="2"/><path d="M15 49 60 17l45 32-5 5-40-27-40 27z" fill={clothFill}/><path d="M30 60h15v18H30zm45 0h15v18H75z" fill="#a5cad2" stroke="#f7efd9" strokeWidth="3"/><path d="M52 98V72q8-12 16 0v26" fill={woodFill}/><path d="M26 53v-5m68 5v-5" stroke="#f5ebd5" strokeWidth="2"/><path d="M57 97h6" stroke="#e2c482" strokeWidth="2"/></>;

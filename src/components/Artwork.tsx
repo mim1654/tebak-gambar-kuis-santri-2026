@@ -1,6 +1,8 @@
 import React from 'react';
+import { Pic, picKey } from './Pic';
 const palette:Record<string,string>={peci:'#17212b',sarung:'#2f7fc1',sajadah:'#1f8a5b',masjid:'#fff6df',bedug:'#c8553d',kitab:'#9c6b36',tasbih:'#1f8a5b',lentera:'#f2c14e',mukena:'#e9e4d7',hijab:'#c8553d',baju:'#2f7fc1',pesantren:'#d5b47b',bendera:'#c8553d',helping:'#f2c14e',tidy:'#2f7fc1',clean:'#1f8a5b',listening:'#c8553d',queue:'#2f7fc1',bookcare:'#9c6b36',calendar:'#c8553d',lantern:'#f2c14e',pair:'#2f7fc1',search:'#1f8a5b',steps:'#9c6b36'};
 export function Artwork({name,size=112}:{name:string;size?:number}) {
+ if(picKey(name)) return <Pic name={name} size={size}/>;
  const key=name.replace(/^odd-.*/, 'search').replace(/^steps-.*/, 'steps'); const color=palette[key]||'#2f7fc1';
  if(name==='masjid'||name==='pesantren') return <svg role="img" aria-label={name==='masjid'?'Ilustrasi masjid':'Ilustrasi pesantren'} viewBox="0 0 160 130" width={size} height={size}>
   <ellipse cx="80" cy="119" rx="65" ry="7" fill="#10263a" opacity=".12"/><path d="M20 62H140V116H20Z" fill={name==='masjid'?'#fff6df':'#e9c98d'} stroke="#d3a75d" strokeWidth="2"/><path d="M45 62Q80 10 115 62Z" fill="#1f8a5b"/><path d="M73 30V12H87V30" fill="#f2c14e"/><path d="M62 116V82Q80 62 98 82V116" fill="#1a3f5c"/><path d="M14 64L80 36L146 64" fill="#2f7fc1"/><path d="M27 64V48L37 42L47 48V64M113 64V48L123 42L133 48V64" fill="#f2c14e"/><circle cx="80" cy="48" r="4" fill="#fff6df"/></svg>;

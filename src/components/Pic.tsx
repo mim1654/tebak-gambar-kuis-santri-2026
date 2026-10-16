@@ -127,17 +127,31 @@ const extraArt: Record<string, ReactNode> = {
 
 
 const stepAsset: Record<string, string> = {
-  'Ambil buku': 'buku', 'Baca buku': 'kitab', 'Simpan di rak': 'b06',
+  'Ambil buku': 'steps-choose-book', 'Baca buku': 'steps-book', 'Simpan di rak': 'steps-library',
   'Basahi tangan': 'steps-hands', 'Pakai sabun dan gosok': 'steps-hands', 'Keringkan tangan': 'steps-hands',
-  'Ambil sajadah': 'sajadah', 'Cari tempat bersih': 'steps-place', 'Gelar sajadah': 'sajadah',
-  'Lihat sampah': 'b03', 'Ambil sampah dengan aman': 'steps-place', 'Buang sampah': 'b03',
-  'Pilih buku': 'buku', 'Kembalikan buku': 'b06',
-  'Dekati teman dengan sopan': 'b01', 'Tanya bantuan yang diperlukan': 'b04', 'Bantu jika teman setuju': 'b01',
+  'Ambil sajadah': 'sajadah', 'Cari tempat bersih': 'steps-place', 'Gelar sajadah': 'steps-prayer',
+  'Lihat sampah': 'b03', 'Ambil sampah dengan aman': 'b03', 'Buang sampah': 'b03',
+  'Pilih buku': 'steps-choose-book', 'Kembalikan buku': 'steps-library',
+  'Dekati teman dengan sopan': 'steps-help', 'Tanya bantuan yang diperlukan': 'steps-help', 'Bantu jika teman setuju': 'b01',
 };
 
 export function StepIllustration({step, size=44}: {step:string; size?:number}) {
   const asset=stepAsset[step] || 'buku';
   return <span className="step-picture"><Pic name={asset} size={size} alt={step}/></span>;
+}
+
+
+const sceneTiles: Record<string, [number, number]> = {
+  b01:[0,0], b02:[1,0], b03:[2,0], b04:[3,0], b05:[0,1], b06:[1,1],
+  'steps-book':[3,1], 'steps-hands':[3,2], 'steps-prayer':[2,2], 'steps-clean':[2,0],
+  'steps-library':[1,3], 'steps-help':[2,3], 'steps-place':[1,2], 'steps-choose-book':[2,1],
+  helping:[0,0], tidy:[1,0], clean:[2,0], listening:[3,0], queue:[0,1], bookcare:[1,1]
+};
+function SceneAtlasPic({name,size=112,alt}:{name:string;size?:number;alt?:string}) {
+  const [col,row]=sceneTiles[name] ?? [0,0];
+  const labels:Record<string,string>={b01:'Anak membantu teman membawa buku',b02:'Anak merapikan buku di meja',b03:'Anak membuang sampah ke tempatnya',b04:'Anak mendengarkan teman',b05:'Anak-anak mengantre dengan tertib',b06:'Anak merapikan buku di rak',helping:'Anak-anak saling membantu membawa buku',tidy:'Anak merapikan alat belajar',clean:'Anak membuang sampah ke tempatnya',listening:'Anak mendengarkan temannya berbicara',queue:'Anak-anak menunggu giliran',bookcare:'Anak merapikan buku di rak'};
+  return <span role="img" aria-label={alt??labels[name]??name} className="atlas-illustration"
+    style={{width:size,height:size,backgroundImage:`url("${import.meta.env.BASE_URL}assets/quiz-scenes-3d.png")`,backgroundSize:'400% 400%',backgroundPosition:`${col*100/3}% ${row*100/3}%`}} />;
 }
 
 const behaviorArt: Record<string, ReactNode> = {
@@ -151,12 +165,13 @@ const behaviorArt: Record<string, ReactNode> = {
 
 export const picKey = (label: string) => {
   const k = label.trim().toLowerCase().replace(/^kitab atau buku$/, 'kitab');
-  return art[k] || extraArt[k] || emoji[k] || behaviorArt[k] ? k : '';
+  return k !== 'pesantren' && (art[k] || extraArt[k] || emoji[k] || behaviorArt[k] || sceneTiles[k]) ? k : '';
 };
 
 export function Pic({ name, size = 112, alt }: { name: string; size?: number; alt?: string }) {
   const k = name.toLowerCase();
-  if (art[k]) return <RealisticPic name={k} size={size} alt={alt} />;
+  if (art[k] && k !== 'pesantren') return <RealisticPic name={k} size={size} alt={alt} />;
+  if (sceneTiles[k]) return <SceneAtlasPic name={k} size={size} alt={alt} />;
   const key = k.replace(/^odd-.*/, 'search');
   if (behaviorArt[k]) return <svg role="img" aria-label={alt || ({b01:'Anak membantu teman membawa buku',b02:'Merapikan alat belajar di atas meja',b03:'Membuang sampah ke tempat sampah',b04:'Mendengarkan teman berbicara',b05:'Anak-anak menunggu giliran dalam antrean',b06:'Buku tersusun rapi di rak'}[k])} viewBox="0 0 120 120" width={size} height={size} focusable="false"><rect x="4" y="4" width="112" height="112" rx="18" fill="#f4ecdb"/><ellipse cx="60" cy="103" rx="35" ry="5" fill="#203d42" opacity=".14"/>{behaviorArt[k]}</svg>;
   if (extraArt[k]) return <svg role="img" aria-label={alt || name} viewBox="0 0 120 120" width={size} height={size} focusable="false"><rect x="4" y="4" width="112" height="112" rx="18" fill="#f4ecdb"/><ellipse cx="60" cy="103" rx="35" ry="5" fill="#203d42" opacity=".14"/>{extraArt[k]}</svg>;

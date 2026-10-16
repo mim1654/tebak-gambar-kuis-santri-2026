@@ -159,7 +159,8 @@ export function Pic({ name, size = 112, alt }: { name: string; size?: number; al
   if (art[k]) return <RealisticPic name={k} size={size} alt={alt} />;
   const key = k.replace(/^odd-.*/, 'search');
   if (behaviorArt[k]) return <svg role="img" aria-label={alt || ({b01:'Anak membantu teman membawa buku',b02:'Merapikan alat belajar di atas meja',b03:'Membuang sampah ke tempat sampah',b04:'Mendengarkan teman berbicara',b05:'Anak-anak menunggu giliran dalam antrean',b06:'Buku tersusun rapi di rak'}[k])} viewBox="0 0 120 120" width={size} height={size} focusable="false"><rect x="4" y="4" width="112" height="112" rx="18" fill="#f4ecdb"/><ellipse cx="60" cy="103" rx="35" ry="5" fill="#203d42" opacity=".14"/>{behaviorArt[k]}</svg>;
-  if (extraArt[k]) return <svg role="img" aria-label={alt || name} viewBox="0 0 120 120" width={size} height={size} focusable="false"><rect x="4" y="4" width="112" height="112" rx="18" fill="#f4ecdb"/><ellipse cx="60" cy="103" rx="35" ry="5" fill="#203d42" opacity=".14"/>{extraArt[k]}</svg>;\n  const e = emoji[k] || emoji[key];
+  if (extraArt[k]) return <svg role="img" aria-label={alt || name} viewBox="0 0 120 120" width={size} height={size} focusable="false"><rect x="4" y="4" width="112" height="112" rx="18" fill="#f4ecdb"/><ellipse cx="60" cy="103" rx="35" ry="5" fill="#203d42" opacity=".14"/>{extraArt[k]}</svg>;
+  const e = emoji[k] || emoji[key];
   if (e) return <span role="img" aria-label={name} style={{ fontSize: size * 0.72, lineHeight: 1, display: 'inline-block', width: size, height: size, textAlign: 'center' }}>{e}</span>;
   return null;
 }

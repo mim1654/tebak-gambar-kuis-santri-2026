@@ -105,16 +105,40 @@ const emoji: Record<string, string> = {
   bola: '⚽', sendok: '🥄', sepatu: '👟', hijab: '🧕', baju: '👕',
 };
 
-const stepEmoji: Record<string, string> = {
-  'Ambil buku': '📖', 'Baca buku': '👀', 'Simpan di rak': '🗄️',
-  'Basahi tangan': '🚰', 'Pakai sabun dan gosok': '🧼', 'Keringkan tangan': '🧻',
-  'Ambil sajadah': '🕌', 'Cari tempat bersih': '✨', 'Gelar sajadah': '🟩',
-  'Lihat sampah': '👀', 'Ambil sampah dengan aman': '🧤', 'Buang sampah': '🗑️',
-  'Pilih buku': '📚', 'Kembalikan buku': '↩️',
-  'Dekati teman dengan sopan': '🚶', 'Tanya bantuan yang diperlukan': '🗣️', 'Bantu jika teman setuju': '🤝',
+const extraArt: Record<string, ReactNode> = {
+  calendar: <><rect x="23" y="22" width="74" height="80" rx="9" fill="#fff" stroke="#567f8f" strokeWidth="4"/><path d="M23 43h74" stroke="#d96652" strokeWidth="18"/><path d="M42 15v17M78 15v17" stroke="#334c55" strokeWidth="5" strokeLinecap="round"/><text x="60" y="78" textAnchor="middle" fontSize="25" fontWeight="800" fill="#253d48">22</text><text x="60" y="94" textAnchor="middle" fontSize="9" fontWeight="800" fill="#327458">OKT</text></>,
+  search: <><circle cx="51" cy="49" r="27" fill="#dcecf0" stroke="#477f91" strokeWidth="7"/><path d="m71 70 27 28" stroke="#9a6a43" strokeWidth="11" strokeLinecap="round"/><circle cx="51" cy="49" r="15" fill="#fff" opacity=".7"/></>,
+  steps: <><path d="M17 95h28V73h27V51h30V29h9v75H17z" fill="#3d82a8" stroke="#245b78" strokeWidth="3" strokeLinejoin="round"/><circle cx="31" cy="87" r="7" fill="#fff"/><circle cx="59" cy="65" r="7" fill="#fff"/><circle cx="87" cy="43" r="7" fill="#fff"/></>,
+  pair: <><rect x="19" y="28" width="36" height="62" rx="7" fill="#e2f0f2" stroke="#457e91" strokeWidth="4"/><rect x="65" y="28" width="36" height="62" rx="7" fill="#f6e6c6" stroke="#b27a44" strokeWidth="4"/><path d="M27 43h20m-20 9h20M73 43h20m-20 9h20" stroke="#647c83" strokeWidth="3" strokeLinecap="round"/><path d="m52 101 8 8 8-8" fill="none" stroke="#327458" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/></>,
+  helping: <><circle cx="38" cy="37" r="14" fill="#efb38e"/><circle cx="82" cy="37" r="14" fill="#df9e79"/><path d="M20 91V69q18-18 36 0v22zm44 0V69q18-18 36 0v22z" fill="#3f83a3"/><path d="m45 63 13 14m13-14L58 77" stroke="#efb38e" strokeWidth="7" strokeLinecap="round"/><rect x="49" y="70" width="19" height="15" rx="2" fill="#b9784c"/></>,
+  'steps-hands': <><path d="M27 31V18h31v13M35 18V12" fill="none" stroke="#547f8b" strokeWidth="5" strokeLinecap="round"/><path d="M57 32q0 8 8 13v7" fill="none" stroke="#547f8b" strokeWidth="4" strokeLinecap="round"/><path d="M62 55c-5 7 5 8 0 15m12-17c-5 7 5 8 0 15" fill="none" stroke="#58a9c1" strokeWidth="4" strokeLinecap="round"/><path d="M34 77q10-10 20 0l8 11q-2 7-8 3l-9-8m17-5q10-8 16 1l8 11q-3 7-9 2l-8-7" fill="#f0b28c" stroke="#cf8e6c" strokeWidth="2" strokeLinejoin="round"/><circle cx="91" cy="32" r="6" fill="#f2c14e"/><circle cx="101" cy="47" r="4" fill="#f2c14e"/></>,
+  'steps-place': <><path d="M25 77 70 32" stroke="#9b6a3f" strokeWidth="7" strokeLinecap="round"/><path d="M66 28 91 52M62 38 83 59" stroke="#d3a64e" strokeWidth="4" strokeLinecap="round"/><path d="M24 84h69" stroke="#b8844f" strokeWidth="5" strokeLinecap="round"/><path d="m82 77 6 6 13-15" fill="none" stroke="#33845f" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/><path d="m34 34 3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="#edc455"/></>,
+  kelas: <><path d="M17 48 60 24l43 24v54H17z" fill="#eed6a3" stroke="#9b7549" strokeWidth="3"/><path d="M12 49 60 20l48 29" fill="none" stroke="#bd624b" strokeWidth="7" strokeLinejoin="round"/><rect x="28" y="58" width="20" height="18" rx="2" fill="#8bbcc8"/><rect x="72" y="58" width="20" height="18" rx="2" fill="#8bbcc8"/><path d="M51 102V79q9-15 18 0v23" fill="#80593d"/></>,
+  perpustakaan: <><rect x="19" y="29" width="82" height="68" rx="3" fill="#b98554" stroke="#805839" strokeWidth="4"/><path d="M18 61h84M18 84h84" stroke="#805839" strokeWidth="4"/><rect x="27" y="38" width="13" height="22" fill="#c95b4d"/><rect x="43" y="34" width="15" height="26" fill="#43876c"/><rect x="63" y="39" width="14" height="21" fill="#477f9a"/><rect x="81" y="35" width="13" height="25" fill="#d6a84e"/><rect x="31" y="67" width="17" height="17" fill="#477f9a"/><rect x="53" y="65" width="14" height="19" fill="#d6a84e"/><rect x="73" y="68" width="19" height="16" fill="#c95b4d"/><path d="M27 97v8m66-8v8" stroke="#805839" strokeWidth="5"/></>,
+  pasar: <><path d="M20 45h80v57H20z" fill="#f0d6a4" stroke="#986d43" strokeWidth="3"/><path d="M15 45 25 25h70l10 20" fill="#d76c52" stroke="#986d43" strokeWidth="3"/><path d="M15 45h90" stroke="#fff4dc" strokeWidth="7" strokeDasharray="14 9"/><rect x="31" y="59" width="25" height="20" fill="#8ab8bf"/><path d="M68 102V76q8-10 16 0v26" fill="#91613f"/></>,
+  stasiun: <><path d="M18 53h84v43H18z" fill="#e9dfc8" stroke="#7a8581" strokeWidth="3"/><path d="M13 54 60 25l47 29" fill="#3e7893" stroke="#355b6b" strokeWidth="3"/><rect x="28" y="63" width="22" height="18" fill="#91c4d0"/><rect x="70" y="63" width="22" height="18" fill="#91c4d0"/><path d="M43 96V82q8-12 16 0v14m7-43V32m0 0h16" fill="none" stroke="#9c7049" strokeWidth="4"/></>,
+  pelabuhan: <><path d="M17 80h86l-13 18H34z" fill="#9c6644" stroke="#71472f" strokeWidth="3"/><path d="M60 30v50M61 35l28 21H61" fill="#fff2d7" stroke="#446f83" strokeWidth="3" strokeLinejoin="round"/><path d="M15 104q12-7 24 0t24 0 24 0 24 0" fill="none" stroke="#56a3ba" strokeWidth="4" strokeLinecap="round"/></>,
+  bola: <><circle cx="60" cy="60" r="39" fill="#fff" stroke="#344650" strokeWidth="4"/><path d="m60 39 15 11-6 18H51l-6-18z" fill="#26343a"/><path d="m60 21 10 8-5 10m29 1-9 10m1 31-16-12m-28 12L48 68M31 40l14 10m-8 35 14-17" fill="none" stroke="#26343a" strokeWidth="4" strokeLinecap="round"/></>,
+  sendok: <><path d="M57 61 42 96" stroke="#8c979a" strokeWidth="9" strokeLinecap="round"/><ellipse cx="65" cy="42" rx="17" ry="25" transform="rotate(24 65 42)" fill="#dbe2e1" stroke="#657982" strokeWidth="4"/><ellipse cx="63" cy="38" rx="7" ry="12" transform="rotate(24 63 38)" fill="#fff"/></>,
+  sepatu: <><path d="M25 73q17-4 28-35l18 7q3 19 22 26 12 4 12 17v9H22v-9q0-10 3-15z" fill="#4a829b" stroke="#2a5162" strokeWidth="4" strokeLinejoin="round"/><path d="M54 52 74 63m-27-3 21 12m-42 15h79" stroke="#fff6df" strokeWidth="4" strokeLinecap="round"/><path d="M61 44 70 51" stroke="#d6a84e" strokeWidth="3"/></>,
+  hijab: <><path d="M60 18q-31 1-33 38l-9 47h84l-9-47q-2-37-33-38z" fill="#d8959c"/><ellipse cx="60" cy="50" rx="17" ry="21" fill="#efb38e"/><path d="M43 49q2-26 17-26t17 26l-8-7H51z" fill="#493733"/><path d="M36 74q24 23 48 0" fill="none" stroke="#f5c8c6" strokeWidth="3"/></>,
+  baju: <><path d="m41 25-18 12L12 61l18 9 8-12v39h44V58l8 12 18-9-11-24L79 25 60 38z" fill="#4385aa" stroke="#2e617b" strokeWidth="3" strokeLinejoin="round"/><path d="M60 38v58M48 29l12 9 12-9" fill="none" stroke="#e9f0e8" strokeWidth="3"/></>,
 };
 
-export const emojiForStep = (s: string) => stepEmoji[s] ?? '🔹';
+
+const stepAsset: Record<string, string> = {
+  'Ambil buku': 'buku', 'Baca buku': 'kitab', 'Simpan di rak': 'b06',
+  'Basahi tangan': 'steps-hands', 'Pakai sabun dan gosok': 'steps-hands', 'Keringkan tangan': 'steps-hands',
+  'Ambil sajadah': 'sajadah', 'Cari tempat bersih': 'steps-place', 'Gelar sajadah': 'sajadah',
+  'Lihat sampah': 'b03', 'Ambil sampah dengan aman': 'steps-place', 'Buang sampah': 'b03',
+  'Pilih buku': 'buku', 'Kembalikan buku': 'b06',
+  'Dekati teman dengan sopan': 'b01', 'Tanya bantuan yang diperlukan': 'b04', 'Bantu jika teman setuju': 'b01',
+};
+
+export function StepIllustration({step, size=44}: {step:string; size?:number}) {
+  const asset=stepAsset[step] || 'buku';
+  return <span className="step-picture"><Pic name={asset} size={size} alt={step}/></span>;
+}
 
 const behaviorArt: Record<string, ReactNode> = {
   b01: <><circle cx="36" cy="36" r="12" fill="#e9b18e"/><path d="M22 55q14-10 28 0l5 38H18z" fill="#3d84b8"/><circle cx="83" cy="36" r="12" fill="#d99b73"/><path d="M69 55q14-10 28 0l5 38H65z" fill="#30936e"/><path d="M47 64l23 8" stroke="#e9b18e" strokeWidth="8" strokeLinecap="round"/><rect x="45" y="68" width="28" height="19" rx="2" fill="#b56e49" stroke="#71452f" strokeWidth="2"/><path d="M59 69v17" stroke="#f2dfb4" strokeWidth="2"/></>,
@@ -127,15 +151,15 @@ const behaviorArt: Record<string, ReactNode> = {
 
 export const picKey = (label: string) => {
   const k = label.trim().toLowerCase().replace(/^kitab atau buku$/, 'kitab');
-  return art[k] || emoji[k] || behaviorArt[k] ? k : '';
+  return art[k] || extraArt[k] || emoji[k] || behaviorArt[k] ? k : '';
 };
 
-export function Pic({ name, size = 112 }: { name: string; size?: number }) {
+export function Pic({ name, size = 112, alt }: { name: string; size?: number; alt?: string }) {
   const k = name.toLowerCase();
-  if (art[k]) return <RealisticPic name={k} size={size} />;
+  if (art[k]) return <RealisticPic name={k} size={size} alt={alt} />;
   const key = k.replace(/^odd-.*/, 'search');
-  if (behaviorArt[k]) return <svg role="img" aria-label={{b01:'Anak membantu teman membawa buku',b02:'Merapikan alat belajar di atas meja',b03:'Membuang sampah ke tempat sampah',b04:'Mendengarkan teman berbicara',b05:'Anak-anak menunggu giliran dalam antrean',b06:'Buku tersusun rapi di rak'}[k]} viewBox="0 0 120 120" width={size} height={size} focusable="false"><rect x="4" y="4" width="112" height="112" rx="18" fill="#f4ecdb"/><ellipse cx="60" cy="103" rx="35" ry="5" fill="#203d42" opacity=".14"/>{behaviorArt[k]}</svg>;
-  const e = emoji[k] || emoji[key];
+  if (behaviorArt[k]) return <svg role="img" aria-label={alt || ({b01:'Anak membantu teman membawa buku',b02:'Merapikan alat belajar di atas meja',b03:'Membuang sampah ke tempat sampah',b04:'Mendengarkan teman berbicara',b05:'Anak-anak menunggu giliran dalam antrean',b06:'Buku tersusun rapi di rak'}[k])} viewBox="0 0 120 120" width={size} height={size} focusable="false"><rect x="4" y="4" width="112" height="112" rx="18" fill="#f4ecdb"/><ellipse cx="60" cy="103" rx="35" ry="5" fill="#203d42" opacity=".14"/>{behaviorArt[k]}</svg>;
+  if (extraArt[k]) return <svg role="img" aria-label={alt || name} viewBox="0 0 120 120" width={size} height={size} focusable="false"><rect x="4" y="4" width="112" height="112" rx="18" fill="#f4ecdb"/><ellipse cx="60" cy="103" rx="35" ry="5" fill="#203d42" opacity=".14"/>{extraArt[k]}</svg>;\n  const e = emoji[k] || emoji[key];
   if (e) return <span role="img" aria-label={name} style={{ fontSize: size * 0.72, lineHeight: 1, display: 'inline-block', width: size, height: size, textAlign: 'center' }}>{e}</span>;
   return null;
 }

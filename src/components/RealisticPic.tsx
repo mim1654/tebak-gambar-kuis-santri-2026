@@ -8,7 +8,7 @@ const labels: Record<string, string> = {
   pensil: 'Pensil', buku: 'Buku'
 };
 
-export function RealisticPic({ name, size = 112 }: { name: string; size?: number }) {
+export function RealisticPic({ name, size = 112, alt }: { name: string; size?: number; alt?: string }) {
   const id = useId().replace(/:/g, '');
   const label = labels[name] ?? name;
   const bg = `bg-${id}`;
@@ -81,7 +81,7 @@ export function RealisticPic({ name, size = 112 }: { name: string; size?: number
       return null;
   }
 
-  return <svg role="img" aria-label={label} viewBox="0 0 120 120" width={size} height={size} focusable="false">
+  return <svg role="img" aria-label={alt ?? label} viewBox="0 0 120 120" width={size} height={size} focusable="false">
     <defs>
       <linearGradient id={cloth} x1="0" y1="0" x2="1" y2="1"><stop stopColor="#5e9f90"/><stop offset=".52" stopColor="#317365"/><stop offset="1" stopColor="#174f49"/></linearGradient>
       <linearGradient id={wood} x1="0" y1="0" x2="1" y2="1"><stop stopColor="#c78b51"/><stop offset=".5" stopColor="#98623b"/><stop offset="1" stopColor="#65432f"/></linearGradient>

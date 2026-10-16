@@ -1,4 +1,6 @@
-import React from 'react';\nimport santriMascot from '../assets/santri-laki-laki.svg';\nimport santriwatiMascot from '../assets/santriwati.svg';
+import React from 'react';
+import santriMascot from '../assets/santri-laki-laki.svg';
+import santriwatiMascot from '../assets/santriwati.svg';
 import { Pic, picKey } from './Pic';
 const palette:Record<string,string>={peci:'#17212b',sarung:'#2f7fc1',sajadah:'#1f8a5b',masjid:'#fff6df',bedug:'#c8553d',kitab:'#9c6b36',tasbih:'#1f8a5b',lentera:'#f2c14e',mukena:'#e9e4d7',hijab:'#c8553d',baju:'#2f7fc1',pesantren:'#d5b47b',bendera:'#c8553d',helping:'#f2c14e',tidy:'#2f7fc1',clean:'#1f8a5b',listening:'#c8553d',queue:'#2f7fc1',bookcare:'#9c6b36',calendar:'#c8553d',lantern:'#f2c14e',pair:'#2f7fc1',search:'#1f8a5b',steps:'#9c6b36'};
 export function Artwork({name,size=112}:{name:string;size?:number}) {

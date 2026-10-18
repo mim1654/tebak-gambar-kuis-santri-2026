@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import { RealisticPic } from './RealisticPic';
 
 const art: Record<string, { label: string; draw: ReactNode }> = {
   peci: { label: 'Peci hitam', draw: <>
@@ -147,12 +146,8 @@ const sceneTiles: Record<string, [number, number]> = {
   'steps-library':[1,3], 'steps-help':[2,3], 'steps-place':[1,2], 'steps-choose-book':[2,1],
   helping:[0,0], tidy:[1,0], clean:[2,0], listening:[3,0], queue:[0,1], bookcare:[1,1]
 };
-function SceneAtlasPic({name,size=112,alt}:{name:string;size?:number;alt?:string}) {
-  const [col,row]=sceneTiles[name] ?? [0,0];
-  const labels:Record<string,string>={b01:'Anak membantu teman membawa buku',b02:'Anak merapikan buku di meja',b03:'Anak membuang sampah ke tempatnya',b04:'Anak mendengarkan teman',b05:'Anak-anak mengantre dengan tertib',b06:'Anak merapikan buku di rak',helping:'Anak-anak saling membantu membawa buku',tidy:'Anak merapikan alat belajar',clean:'Anak membuang sampah ke tempatnya',listening:'Anak mendengarkan temannya berbicara',queue:'Anak-anak menunggu giliran',bookcare:'Anak merapikan buku di rak'};
-  return <span role="img" aria-label={alt??labels[name]??name} className="atlas-illustration"
-    style={{width:size,height:size,backgroundImage:`url("${import.meta.env.BASE_URL}assets/quiz-scenes-3d.png")`,backgroundSize:'400% 400%',backgroundPosition:`${col*100/3}% ${row*100/3}%`}} />;
-}
+
+
 
 const behaviorArt: Record<string, ReactNode> = {
   b01: <><circle cx="36" cy="36" r="12" fill="#e9b18e"/><path d="M22 55q14-10 28 0l5 38H18z" fill="#3d84b8"/><circle cx="83" cy="36" r="12" fill="#d99b73"/><path d="M69 55q14-10 28 0l5 38H65z" fill="#30936e"/><path d="M47 64l23 8" stroke="#e9b18e" strokeWidth="8" strokeLinecap="round"/><rect x="45" y="68" width="28" height="19" rx="2" fill="#b56e49" stroke="#71452f" strokeWidth="2"/><path d="M59 69v17" stroke="#f2dfb4" strokeWidth="2"/></>,
@@ -168,13 +163,62 @@ export const picKey = (label: string) => {
   return k !== 'pesantren' && (art[k] || extraArt[k] || emoji[k] || behaviorArt[k] || sceneTiles[k]) ? k : '';
 };
 
-export function Pic({ name, size = 112, alt }: { name: string; size?: number; alt?: string }) {
+const sceneToBehavior: Record<string, string> = {
+  helping: 'b01', tidy: 'b02', clean: 'b03', listening: 'b04', queue: 'b05', bookcare: 'b06',
+  'steps-clean': 'b03', 'steps-book': 'buku', 'steps-library': 'perpustakaan', 'steps-prayer': 'sajadah', 'steps-help': 'helping'
+};
+
+export function Pic({ name, size = 112, alt, bare = false }: { name: string; size?: number; alt?: string; bare?: boolean }) {
   const k = name.toLowerCase();
-  if (art[k] && k !== 'pesantren') return <RealisticPic name={k} size={size} alt={alt} />;
-  if (sceneTiles[k]) return <SceneAtlasPic name={k} size={size} alt={alt} />;
+  if (art[k]) {
+    return (
+      <svg role="img" aria-label={alt || art[k].label} viewBox="0 0 120 120" width={size} height={size} focusable="false">
+        <defs>
+          <linearGradient id="gDark" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#273541"/><stop offset="100%" stopColor="#17212b"/></linearGradient>
+          <linearGradient id="gBlue" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#3d91d6"/><stop offset="100%" stopColor="#205f93"/></linearGradient>
+          <linearGradient id="gGreen" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#2aa870"/><stop offset="100%" stopColor="#176a45"/></linearGradient>
+          <linearGradient id="gGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#ffd875"/><stop offset="100%" stopColor="#d99f24"/></linearGradient>
+          <linearGradient id="gRed" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#e06950"/><stop offset="100%" stopColor="#ab3e28"/></linearGradient>
+          <linearGradient id="gBrown" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#b37c44"/><stop offset="100%" stopColor="#7a4e23"/></linearGradient>
+        </defs>
+        {!bare && <rect x="4" y="4" width="112" height="112" rx="18" fill="#f4ecdb"/>}
+        <ellipse cx="60" cy="103" rx="35" ry="5" fill="#203d42" opacity=".14"/>
+        {art[k].draw}
+      </svg>
+    );
+  }
+  const mappedKey = sceneToBehavior[k];
+  if (mappedKey && art[mappedKey]) {
+    return <Pic name={mappedKey} size={size} alt={alt} bare={bare} />;
+  }
+  if (mappedKey && behaviorArt[mappedKey]) {
+    return (
+      <svg role="img" aria-label={alt || k} viewBox="0 0 120 120" width={size} height={size} focusable="false">
+        {!bare && <rect x="4" y="4" width="112" height="112" rx="18" fill="#f4ecdb"/>}
+        <ellipse cx="60" cy="103" rx="35" ry="5" fill="#203d42" opacity=".14"/>
+        {behaviorArt[mappedKey]}
+      </svg>
+    );
+  }
+  if (behaviorArt[k]) {
+    return (
+      <svg role="img" aria-label={alt || k} viewBox="0 0 120 120" width={size} height={size} focusable="false">
+        {!bare && <rect x="4" y="4" width="112" height="112" rx="18" fill="#f4ecdb"/>}
+        <ellipse cx="60" cy="103" rx="35" ry="5" fill="#203d42" opacity=".14"/>
+        {behaviorArt[k]}
+      </svg>
+    );
+  }
   const key = k.replace(/^odd-.*/, 'search');
-  if (behaviorArt[k]) return <svg role="img" aria-label={alt || ({b01:'Anak membantu teman membawa buku',b02:'Merapikan alat belajar di atas meja',b03:'Membuang sampah ke tempat sampah',b04:'Mendengarkan teman berbicara',b05:'Anak-anak menunggu giliran dalam antrean',b06:'Buku tersusun rapi di rak'}[k])} viewBox="0 0 120 120" width={size} height={size} focusable="false"><rect x="4" y="4" width="112" height="112" rx="18" fill="#f4ecdb"/><ellipse cx="60" cy="103" rx="35" ry="5" fill="#203d42" opacity=".14"/>{behaviorArt[k]}</svg>;
-  if (extraArt[k]) return <svg role="img" aria-label={alt || name} viewBox="0 0 120 120" width={size} height={size} focusable="false"><rect x="4" y="4" width="112" height="112" rx="18" fill="#f4ecdb"/><ellipse cx="60" cy="103" rx="35" ry="5" fill="#203d42" opacity=".14"/>{extraArt[k]}</svg>;
+  if (extraArt[k] || extraArt[key]) {
+    return (
+      <svg role="img" aria-label={alt || name} viewBox="0 0 120 120" width={size} height={size} focusable="false">
+        {!bare && <rect x="4" y="4" width="112" height="112" rx="18" fill="#f4ecdb"/>}
+        <ellipse cx="60" cy="103" rx="35" ry="5" fill="#203d42" opacity=".14"/>
+        {extraArt[k] || extraArt[key]}
+      </svg>
+    );
+  }
   const e = emoji[k] || emoji[key];
   if (e) return <span role="img" aria-label={name} style={{ fontSize: size * 0.72, lineHeight: 1, display: 'inline-block', width: size, height: size, textAlign: 'center' }}>{e}</span>;
   return null;

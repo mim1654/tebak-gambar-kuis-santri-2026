@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, ArrowRight, Check, CircleHelp, Home, Pause, Play, RotateCcw, Settings, Volume2, VolumeX, X, Download, Upload, Trophy, Wifi, WifiOff, Plus, Minus, Eye, BookOpen, Sparkles } from 'lucide-react';
-import { Artwork, Mascot } from './components/Artwork';
+import { ArrowLeft, Check, CircleHelp, Home, Pause, Play, RotateCcw, Settings, Volume2, VolumeX, X, Download, Upload, Trophy, Wifi, WifiOff, Plus, Minus, Sparkles, Users, Layers, Lock } from 'lucide-react';
+import { Artwork, Mascot, MascotPair } from './components/Artwork';
 import { Pic, picKey, StepIllustration } from './components/Pic';
 import { playSfx, startMusic, stopMusic, unlockAudio } from './lib/audio';
 import { getModeQuestions, modes, questions, type ModeId, type Question } from './data/questions';
@@ -40,18 +40,230 @@ function App(){
  const questionList=useMemo(()=>current?.mode==='order'&&current.steps?shuffle(current.steps):current?.options?(settings.shuffle?shuffle(current.options):current.options):[],[current?.id,settings.shuffle]);
  const goHome=()=>{setScreen('home');setFeedback('');setChosen([]);setOrder([]);};
  return <div className="app-shell">
-  <header className="topbar"><button className="brand" onClick={goHome} aria-label="Kembali ke beranda"><span className="brand-mark">✦</span><span><b>KUIS SANTRI</b><small>HSN · 2026</small></span></button><div className="top-actions"><span className={`status ${online?'':'offline'}`}><span className="status-dot"/>{online?'Siap bermain':'Mode offline'}</span><button className="icon-button" onClick={()=>setScreen('help')} aria-label="Petunjuk"><CircleHelp size={21}/></button><button className="icon-button" onClick={openSettings} aria-label="Pengaturan guru"><Settings size={21}/></button></div></header>
-  {screen==='home'&&<main className="home-screen"><div className="hero-copy"><span className="eyebrow"><Sparkles size={15}/> BELAJAR · BERMAIN · BERTEMAN</span><h1>Tebak Gambar<br/><span>& Kuis Santri</span></h1><p className="hero-subtitle">Petualangan seru menyambut <b>Hari Santri Nasional 2026</b></p><div className="date-pill"><span className="date-icon">22</span><span><b>22 Oktober 2026</b><small>Hari Santri Nasional</small></span></div><div className="hero-buttons"><button className="btn btn-gold btn-large" onClick={()=>setScreen('modes')}>MULAI BERMAIN <ArrowRight size={21}/></button><button className="btn btn-outline" onClick={openSettings}><Settings size={18}/> Pengaturan Guru</button></div><div className="hero-note"><span className="note-icon"><Check size={15}/></span> Dirancang ramah untuk cara belajar yang beragam</div></div><div className="hero-art"><div className="moon"/><div className="star star-one">✦</div><div className="star star-two">✧</div><div className="lantern-decoration lantern-left"><Artwork name="lentera" size={52}/></div><div className="mosque-scene"><Artwork name="masjid" size={205}/></div><img className="mascot-pair-3d" src={`${import.meta.env.BASE_URL}assets/santri-mascots-3d.png`} alt="Santri laki-laki dan santriwati memakai pakaian putih, tersenyum, dan menyapa dengan ramah" draggable={false}/><div className="art-ground"/><div className="art-caption">Ayo belajar sambil bermain!</div></div><div className="home-bottom"><div><BookOpen size={20}/><span><b>36 aktivitas</b><small>Siap dimainkan</small></span></div><div><Eye size={20}/><span><b>Ramah akses</b><small>Kontrol sederhana</small></span></div><div><WifiOff size={20}/><span><b>Bisa offline</b><small>Setelah dimuat</small></span></div></div></main>}
-  {screen==='modes'&&<main className="page-wrap"><div className="page-heading"><button className="back-link" onClick={goHome}><ArrowLeft size={17}/> Beranda</button><span className="eyebrow">PILIH PETUALANGANMU</span><h1>Mau bermain apa hari ini?</h1><p>Pilih satu permainan atau gabungkan beberapa mode.</p></div><div className="mode-grid">{modes.map(m=><button key={m.id} className={`mode-card ${m.color} ${settings.modes.includes(m.id)?'selected':''}`} onClick={()=>update({modes:settings.modes.includes(m.id)?settings.modes.filter(x=>x!==m.id):[...settings.modes,m.id]})} aria-pressed={settings.modes.includes(m.id)}><span className="mode-check">{settings.modes.includes(m.id)?<Check size={17}/>:<Plus size={17}/>}</span><div className="mode-art"><Artwork name={m.symbol} size={88}/></div><h2>{m.title}</h2><p>{m.description}</p><span className="mode-tag">{getModeQuestions(m.id).length} aktivitas</span></button>)}</div><div className="session-controls"><div className="count-control"><span>Jumlah soal</span><button className="small-icon" onClick={()=>update({count:Math.max(1,settings.count-3)})} aria-label="Kurangi jumlah soal"><Minus size={16}/></button><b>{settings.count}</b><button className="small-icon" onClick={()=>update({count:Math.min(36,settings.count+3)})} aria-label="Tambah jumlah soal"><Plus size={16}/></button></div><label className="check-label"><input type="checkbox" checked={settings.teams} onChange={e=>update({teams:e.target.checked})}/> Bermain berkelompok</label><button className="btn btn-gold btn-large" disabled={!settings.modes.length} onClick={()=>startGame(settings.modes)}>MULAI SESI <ArrowRight size={20}/></button></div>{settings.teams&&<div className="team-editor"><label>Nama tim 1<input value={settings.teamNames[0]} onChange={e=>update({teamNames:[e.target.value,settings.teamNames[1]]})}/></label><label>Nama tim 2<input value={settings.teamNames[1]} onChange={e=>update({teamNames:[settings.teamNames[0],e.target.value]})}/></label></div>}</main>}
-  {screen==='game'&&current&&<main className="game-wrap"><div className="game-top"><button className="back-link" onClick={()=>setScreen('pause')}><Pause size={17}/> Jeda</button><div className="progress-meta"><span>RONDE {round}</span><b>{index+1} <small>/ {session.length}</small></b></div><div className="score-chip"><Trophy size={16}/>{settings.scoreEnabled?score+' poin':'Mode tanpa skor'}</div></div><div className="progress-track"><span style={{width:`${((index+1)/session.length)*100}%`}}/></div><section className="question-panel"><div className="question-mascot"><Mascot girl={index%2===1} pose={feedback==='correct'?'celebrate':hint?'think':'wave'}/><div className="speech-bubble">{feedback==='correct'?'Hebat, kamu berhasil!':feedback==='reveal'?'Kamu sudah berusaha dengan baik.':hint?'Ini petunjuk untukmu!':'Kita coba bersama, ya!'}</div></div><div className="question-main"><div className="question-kicker"><span>{mode?.title}</span><span className="difficulty">{'★'.repeat(current.difficulty)}{'☆'.repeat(3-current.difficulty)}</span></div><h1>{current.prompt}</h1>{current.mode==='order'?<><p className="instruction">Pilih langkah sesuai urutan, lalu gunakan panah untuk mengatur posisi.</p><div className="order-pool">{questionList.filter(s=>!order.includes(s)).map((s,i)=><button className="option-card order-option" key={s} onClick={()=>chooseOrder(s)}><span className="option-number">{i+1}</span><StepIllustration step={s} size={42}/><span>{s}</span><Plus size={17}/></button>)}</div><div className="ordered-list"><h3>Urutan pilihanmu</h3>{order.map((s,i)=><div className="ordered-item" key={`${s}-${i}`}><b>{i+1}</b><StepIllustration step={s} size={42}/><span>{s}</span><button className="small-icon" aria-label={`Pindahkan ${s} ke atas`} onClick={()=>moveOrder(i,-1)} disabled={i===0}><ArrowLeft size={15}/></button><button className="small-icon" aria-label={`Pindahkan ${s} ke bawah`} onClick={()=>moveOrder(i,1)} disabled={i===order.length-1}><ArrowRight size={15}/></button><button className="small-icon remove" aria-label={`Hapus ${s}`} onClick={()=>chooseOrder(s)}><X size={15}/></button></div>)}</div></>:<>{current.mode!=='odd'&&<div className="question-illustration"><Artwork name={current.image} size={132}/>{current.mode==='match'&&<span className="illustration-caption">Pilih dua gambar yang sama</span>}</div>}<p className="instruction">{current.mode==='match'?'Sentuh dua kartu yang memiliki nama sama.':current.mode==='odd'?'Pilih satu gambar yang berbeda.':'Pilih jawaban yang menurutmu tepat.'}</p><div className={`answer-grid ${current.mode==='match'?'match-grid':''}`}>{(current.mode==='match'?current.options:questionList).map((option,i)=><button key={`${option}-${i}`} className={`option-card ${chosen.includes(option)?'chosen':''} ${feedback==='correct'&&option===current.correct?'correct-option':''}`} onClick={()=>answer(option)} disabled={!!feedback} aria-pressed={chosen.includes(option)}><span className="option-number">{String.fromCharCode(65+i)}</span>{(current.mode==='match'||current.mode==='odd')&&picKey(option)&&<Pic name={option} size={72}/>}<span>{option}</span>{chosen.includes(option)&&<Check size={17}/>}</button>)}</div></>}
- {hint&&<div className="hint-box"><CircleHelp size={18}/><span>{current.hint}</span></div>}{feedback&&<div className={`feedback ${feedback==='correct'?'success':'gentle'}`} role="status"><span className="feedback-symbol">{feedback==='correct'?'✓':'♡'}</span><span><b>{feedback==='correct'?'Hebat, kamu berhasil!':feedback==='reveal'?`Jawabannya: ${current.correct}`:'Ayo, kita coba lagi.'}</b><small>{feedback==='correct'?'Terus semangat, ya!':feedback==='reveal'?'Tidak apa-apa, setiap usaha itu berarti.':'Perhatikan gambar dan coba sekali lagi.'}</small></span></div>}
- <div className="question-actions"><button className="btn btn-soft" onClick={hintAction}><CircleHelp size={18}/> Bantuan</button><button className="btn btn-soft" onClick={()=>speak(current.prompt)} disabled={!ttsAvailable||settings.quiet}><Volume2 size={18}/> Dengarkan</button>{current.mode==='order'&&!feedback&&<button className="btn btn-blue" onClick={orderCheck} disabled={order.length!==3}>Periksa urutan <Check size={17}/></button>}{feedback==='try'&&<button className="btn btn-blue" onClick={retry}>Coba lagi <RotateCcw size={17}/></button>}{feedback==='correct'||feedback==='reveal'?<button className="btn btn-gold" onClick={next}>{index===session.length-1?'Lihat hasil':'Lanjut'} <ArrowRight size={18}/></button>:null}</div></div></section><div className="game-footnote"><span>✨</span> Tidak harus terburu-buru. Belajar dengan nyaman, ya!</div></main>}
-  {screen==='pause'&&<main className="center-screen"><div className="pause-card"><Mascot pose="rest"/><span className="eyebrow">WAKTU REHAT</span><h1>Kita istirahat sebentar, ya.</h1><p>Ambil waktu yang kamu perlukan. Permainan akan menunggu di sini.</p><div className="center-actions"><button className="btn btn-gold btn-large" onClick={()=>setScreen('game')}><Play size={18}/> Lanjut bermain</button><button className="btn btn-outline-dark" onClick={goHome}><Home size={18}/> Kembali ke beranda</button><button className="btn btn-soft" onClick={()=>update({quiet:!settings.quiet,sound:settings.quiet,voice:settings.quiet,music:false,minimalMotion:!settings.quiet})}>{settings.quiet?<Volume2 size={17}/>:<VolumeX size={17}/>} {settings.quiet?'Aktifkan suara':'Mode tenang'}</button></div></div></main>}
-  {screen==='result'&&<main className="center-screen"><div className="result-card"><div className="celebration-stars">✦　✧　✦</div><div className="result-mascots"><Mascot pose="celebrate"/><Mascot girl pose="celebrate"/></div><span className="eyebrow">SESI SELESAI</span><h1>Selamat! Kamu telah menyelesaikan permainan.</h1><p>Terima kasih sudah belajar dan bermain bersama.</p><div className="result-stats"><div><b>{completed}</b><span>Jawaban benar</span></div><div><b>{session.length}</b><span>Aktivitas dicoba</span></div>{settings.scoreEnabled&&<div><b>{score}</b><span>Total poin</span></div>}</div>{settings.teams&&<div className="team-result">Skor kelompok: <b>{settings.teamNames[0]}</b> & <b>{settings.teamNames[1]}</b> bergantian bermain. Skor individu tidak dibandingkan.</div>}<div className="center-actions"><button className="btn btn-gold btn-large" onClick={()=>startGame(settings.modes)}><RotateCcw size={18}/> Main lagi</button><button className="btn btn-outline-dark" onClick={()=>{setNotice(`Ringkasan sesi: ${completed} jawaban benar dari ${session.length} aktivitas. ${settings.scoreEnabled?`Skor ${score} poin.`:''}`);goHome();}}><Home size={18}/> Kembali ke beranda</button><button className="btn btn-soft" onClick={()=>{const summary=`Ringkasan Kuis Santri\nTanggal: ${new Date().toLocaleDateString('id-ID')}\nAktivitas dicoba: ${session.length}\nJawaban benar: ${completed}\nSkor: ${score}\nCatatan: hasil ini bukan penilaian kemampuan anak.`;const blob=new Blob([summary],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='ringkasan-sesi-santri.txt';a.click();URL.revokeObjectURL(url);}}><Download size={17}/> Ringkasan guru</button></div></div></main>}
-  {screen==='help'&&<div className="overlay" role="dialog" aria-modal="true" aria-labelledby="help-title"><div className="modal-card help-modal"><button className="modal-close" onClick={()=>setScreen('home')} aria-label="Tutup petunjuk"><X/></button><span className="eyebrow">PETUNJUK SINGKAT</span><h1 id="help-title">Cara bermain</h1><div className="help-list"><div><span>1</span><p><b>Pilih permainan</b><small>Pilih satu atau beberapa mode yang kamu suka.</small></p></div><div><span>2</span><p><b>Amati gambar</b><small>Baca, dengarkan, atau minta bantuan guru.</small></p></div><div><span>3</span><p><b>Pilih jawaban</b><small>Sentuh kartu. Tidak ada batas waktu secara bawaan.</small></p></div><div><span>4</span><p><b>Istirahat jika perlu</b><small>Tekan tombol Jeda kapan saja.</small></p></div></div><button className="btn btn-gold btn-large full" onClick={()=>setScreen('modes')}>Mengerti, ayo bermain <ArrowRight size={18}/></button></div></div>}
-  {screen==='settings'&&<div className="overlay" role="dialog" aria-modal="true" aria-labelledby="settings-title"><div className="modal-card settings-modal"><div className="modal-heading"><div><span className="eyebrow">RUANG PENDAMPING</span><h1 id="settings-title">Pengaturan Guru</h1></div><button className="modal-close" onClick={()=>setScreen('home')} aria-label="Tutup pengaturan"><X/></button></div>{pin!==settings.pin&&<div className="pin-gate"><div className="pin-icon"><Settings size={25}/></div><h2>Masukkan PIN guru</h2><p>PIN awal: <b>1234</b>. PIN ini hanya pengunci sederhana di perangkat.</p><form onSubmit={e=>{e.preventDefault();enterSettings();}}><input autoFocus type="password" inputMode="numeric" maxLength={12} value={pin} onChange={e=>setPin(e.target.value)} placeholder="Masukkan PIN" aria-label="PIN guru"/><button className="btn btn-gold" type="submit">Buka pengaturan</button></form>{pinError&&<p className="error-text" role="alert">{pinError}</p>}<button className="text-button" onClick={()=>setScreen('home')}>Kembali</button></div>}{pin===settings.pin&&<><div className="settings-tabs">{[['game','Permainan'],['teams','Tim & skor'],['audio','Audio'],['access','Aksesibilitas'],['data','Data & sistem']].map(([id,label])=><button key={id} className={settingsTab===id?'active':''} onClick={()=>setSettingsTab(id)}>{label}</button>)}</div><div className="settings-content">
- {settingsTab==='game'&&<div className="setting-section"><h2>Atur sesi permainan</h2><p className="muted">Pilih mode yang ingin digunakan dalam kegiatan.</p><div className="settings-mode-list">{modes.map(m=><label key={m.id} className="setting-check"><input type="checkbox" checked={settings.modes.includes(m.id)} onChange={e=>update({modes:e.target.checked?[...settings.modes,m.id]:settings.modes.filter(x=>x!==m.id)})}/><span>{m.title}</span></label>)}</div><div className="setting-grid"><label>Jumlah soal<select value={settings.count} onChange={e=>update({count:+e.target.value})}>{[6,9,12,18,24,30,36].map(n=><option key={n}>{n}</option>)}</select></label><label>Tingkat kesulitan<select value={settings.difficulty} onChange={e=>update({difficulty:+e.target.value})}><option value="1">Mudah</option><option value="2">Sedang</option><option value="3">Semua tingkat</option></select></label><label>Percobaan ulang<select value={settings.attempts} onChange={e=>update({attempts:+e.target.value})}>{[1,2,3,4,5].map(n=><option key={n} value={n}>{n} kali</option>)}</select></label><label>Durasi jeda (detik)<select value={settings.breakSeconds} onChange={e=>update({breakSeconds:+e.target.value})}>{[0,10,15,30,60].map(n=><option key={n} value={n}>{n===0?'Bebas':n+' detik'}</option>)}</select></label></div><Toggle label="Acak urutan soal" checked={settings.shuffle} onChange={v=>update({shuffle:v})}/><Toggle label="Lanjut otomatis setelah jawaban benar" checked={settings.autoNext} onChange={v=>update({autoNext:v})}/><p className="muted">Tidak ada batas waktu. Anak dapat menjawab dengan tenang dan guru bisa memberi jeda kapan saja.</p></div>}
- {settingsTab==='teams'&&<div className="setting-section"><h2>Tim dan penilaian</h2><Toggle label="Mode bermain kelompok" checked={settings.teams} onChange={v=>update({teams:v})}/><Toggle label="Tampilkan skor" checked={settings.scoreEnabled} onChange={v=>update({scoreEnabled:v})}/><div className="setting-grid"><label>Nama tim 1<input value={settings.teamNames[0]} onChange={e=>update({teamNames:[e.target.value,settings.teamNames[1]]})}/></label><label>Nama tim 2<input value={settings.teamNames[1]} onChange={e=>update({teamNames:[settings.teamNames[0],e.target.value]})}/></label><label>Poin per jawaban benar<input type="number" min="0" max="100" value={settings.points} onChange={e=>update({points:Math.max(0,Math.min(100,+e.target.value))})}/></label><label>Skor awal<input type="number" min="0" max="10000" value={0} readOnly/></label></div><p className="muted">Skor hanya untuk suasana bermain, bukan ukuran kemampuan anak. Pergantian giliran berjalan bergantian pada setiap soal.</p></div>}
+  <header className="topbar">
+   <button className="brand" onClick={goHome} aria-label="Kembali ke beranda">
+    <span className="brand-mark"><Artwork name="lentera" size={26}/></span>
+    <span><b>KUIS SANTRI</b><small>HSN : 2026</small></span>
+   </button>
+   <div className="top-actions">
+    <span className={`status ${online?'':'offline'}`}>
+     {online ? <Wifi size={15}/> : <WifiOff size={15}/>}
+     <span>{online?'Siap bermain':'Mode offline'}</span>
+    </span>
+    <button className="icon-button" onClick={()=>setScreen('help')} aria-label="Petunjuk bermain"><CircleHelp size={20}/></button>
+    <button className="icon-button" onClick={openSettings} aria-label="Pengaturan guru"><Settings size={20}/></button>
+   </div>
+  </header>
+  {screen==='home'&&<main className="home-screen">
+   <div className="hero-copy">
+    <div className="event-badge">
+     <span className="event-date">22 OKTOBER</span>
+     <span className="event-title">Hari Santri Nasional 2026</span>
+    </div>
+    <h1>Tebak Gambar <br/><span className="highlight-gold">& Kuis Santri</span></h1>
+    <p className="hero-subtitle">
+     Permainan edukasi interaktif untuk mengenali budaya santri, adab terpuji, dan sejarah Hari Santri Nasional dengan cara yang menyenangkan dan ramah anak.
+    </p>
+    <div className="hero-buttons">
+     <button className="btn btn-gold btn-large" onClick={()=>setScreen('modes')}>
+      Mulai Bermain
+     </button>
+     <button className="btn btn-outline" onClick={openSettings}>
+      <Settings size={18}/> Pengaturan Guru
+     </button>
+    </div>
+    <div className="hero-modes-strip">
+     <span className="strip-label">Pilihan Petualangan:</span>
+     <div className="strip-tags">
+      <span>Tebak Gambar</span>
+      <span>Adab Santri</span>
+      <span>Pasangkan Kartu</span>
+      <span>Temukan Berbeda</span>
+      <span>Urutkan Langkah</span>
+      <span>Sejarah HSN</span>
+     </div>
+    </div>
+   </div>
+   <div className="hero-stage">
+    <div className="arch-portal">
+     <div className="portal-sky">
+      <div className="portal-lantern"><Artwork name="lentera" size={54}/></div>
+      <div className="portal-mosque"><Artwork name="masjid" size={200}/></div>
+     </div>
+     <MascotPair className="portal-mascots"/>
+     <div className="portal-caption">
+      <span>Ahmad & Siti menyambutmu!</span>
+     </div>
+    </div>
+   </div>
+  </main>}
+  {screen==='modes'&&<main className="page-wrap modes-wrap">
+   <div className="page-heading">
+    <div className="page-nav-bar">
+     <button type="button" className="back-link" onClick={goHome}><ArrowLeft size={16}/> Kembali ke Beranda</button>
+    </div>
+    <h1>Pilih Petualangan Santri</h1>
+    <p className="page-sub">Pilih satu jenis permainan atau gabungkan beberapa mode sekaligus untuk kegiatan belajar santri.</p>
+    <div className="modes-toolbar">
+     <span className="modes-selection-pill">{settings.modes.length} dari {modes.length} Mode Terpilih</span>
+     <div className="modes-quick-buttons">
+      <button 
+        type="button"
+        className="btn-pill" 
+        onClick={()=>update({modes:modes.map(m=>m.id)})} 
+        disabled={settings.modes.length===modes.length}
+      >
+        Pilih Semua
+      </button>
+      <button 
+        type="button"
+        className="btn-pill btn-pill-outline" 
+        onClick={()=>update({modes:[]})} 
+        disabled={settings.modes.length===0}
+      >
+        Hapus Pilihan
+      </button>
+     </div>
+    </div>
+   </div>
+   <div className="mode-grid">
+    {modes.map(m=>{
+     const isSelected = settings.modes.includes(m.id);
+     const qCount = getModeQuestions(m.id).length;
+     return (
+      <button 
+        key={m.id} 
+        type="button"
+        className={`mode-card ${m.color} ${isSelected ? 'selected' : ''}`} 
+        onClick={()=>update({modes:isSelected ? settings.modes.filter(x=>x!==m.id) : [...settings.modes, m.id]})} 
+        aria-pressed={isSelected}
+      >
+       <div className="mode-accent-stripe" aria-hidden="true" />
+       <div className="mode-card-header">
+        <span className="mode-tag"><Sparkles size={13}/> {qCount} Aktivitas</span>
+        <span className={`mode-check ${isSelected ? 'is-selected' : ''}`} aria-hidden="true">
+         {isSelected ? <Check size={16} strokeWidth={2.6}/> : <Plus size={16} strokeWidth={2}/>}
+        </span>
+       </div>
+       <div className="mode-art">
+        <div className="mode-art-medallion">
+         <Artwork name={m.symbol} size={74} bare={true}/>
+        </div>
+       </div>
+       <div className="mode-card-body">
+        <h2>{m.title}</h2>
+        <p>{m.description}</p>
+       </div>
+       <div className="mode-card-footer">
+        <span className={`mode-status ${isSelected ? 'status-active' : 'status-idle'}`}>
+         {isSelected ? '✓ Mode Aktif' : '+ Sentuh untuk Memilih'}
+        </span>
+       </div>
+      </button>
+     );
+    })}
+   </div>
+   <div className="session-controls">
+    <div className="session-control-box count-box">
+     <div className="control-meta">
+      <span className="control-label"><Layers size={15}/> Jumlah Soal</span>
+      <span className="control-sub">Per sesi permainan</span>
+     </div>
+     <div className="stepper-wrap">
+      <button 
+        type="button" 
+        className="stepper-btn" 
+        onClick={()=>update({count:Math.max(3,settings.count-3)})} 
+        disabled={settings.count<=3}
+        aria-label="Kurangi jumlah soal"
+      >
+       <Minus size={16} strokeWidth={2.4}/>
+      </button>
+      <div className="stepper-value-box">
+       <b>{settings.count}</b>
+       <small>Soal</small>
+      </div>
+      <button 
+        type="button" 
+        className="stepper-btn" 
+        onClick={()=>update({count:Math.min(36,settings.count+3)})} 
+        disabled={settings.count>=36}
+        aria-label="Tambah jumlah soal"
+      >
+       <Plus size={16} strokeWidth={2.4}/>
+      </button>
+     </div>
+    </div>
+
+    <div className="session-control-box team-box">
+     <label className="team-switch-label">
+      <div className="team-switch-meta">
+       <span className="control-label"><Users size={15}/> Bermain Berkelompok</span>
+       <span className="control-sub">2 Tim bergantian tiap giliran</span>
+      </div>
+      <input 
+        type="checkbox" 
+        className="team-checkbox-hidden" 
+        checked={settings.teams} 
+        onChange={e=>update({teams:e.target.checked})}
+      />
+      <span className={`team-toggle-pill ${settings.teams ? 'active' : ''}`} aria-hidden="true">
+       <span className="team-toggle-text text-active">Aktif</span>
+       <span className="team-toggle-text text-idle">Mati</span>
+       <span className="team-toggle-knob" />
+      </span>
+     </label>
+    </div>
+
+    <div className="session-control-box action-box">
+     <button 
+       type="button" 
+       className="btn btn-gold btn-large btn-start-game" 
+       disabled={!settings.modes.length} 
+       onClick={()=>startGame(settings.modes)}
+     >
+      <Play size={18} fill="currentColor"/>
+      <span>Mulai Sesi Permainan</span>
+     </button>
+     {!settings.modes.length && (
+      <span className="zero-modes-warning">Pilih minimal 1 mode di atas</span>
+     )}
+    </div>
+   </div>
+   {settings.teams&&<div className="team-editor">
+    <div className="team-input-card">
+     <div className="team-badge-row">
+      <span className="team-dot" style={{background:'#2F7FC1'}} />
+      <label htmlFor="team-1-name">Nama Tim 1 (Biru)</label>
+     </div>
+     <input 
+       id="team-1-name" 
+       value={settings.teamNames[0]} 
+       placeholder="Nama Tim 1" 
+       onChange={e=>update({teamNames:[e.target.value,settings.teamNames[1]]})}
+     />
+    </div>
+    <div className="team-input-card">
+     <div className="team-badge-row">
+      <span className="team-dot" style={{background:'#1F8A5B'}} />
+      <label htmlFor="team-2-name">Nama Tim 2 (Hijau)</label>
+     </div>
+     <input 
+       id="team-2-name" 
+       value={settings.teamNames[1]} 
+       placeholder="Nama Tim 2" 
+       onChange={e=>update({teamNames:[settings.teamNames[0],e.target.value]})}
+     />
+    </div>
+   </div>}
+  </main>}   {screen==='game'&&current&&<main className="game-wrap"><div className="game-top"><button className="back-link" onClick={()=>setScreen('pause')}><Pause size={17}/> Jeda</button><div className="progress-meta"><span>RONDE {round}</span><b>{index+1} <small>/ {session.length}</small></b></div><div className="score-chip"><Trophy size={16}/>{settings.scoreEnabled?score+' poin':'Mode tanpa skor'}</div></div><div className="progress-track"><span style={{width:`${((index+1)/session.length)*100}%`}}/></div><section className="question-panel"><div className="question-mascot"><div className="mascot-pedestal"><Mascot girl={index%2===1} pose={feedback==='correct'?'celebrate':hint?'think':'wave'}/></div><div className="speech-bubble">{feedback==='correct'?'Hebat, kamu berhasil!':feedback==='reveal'?'Kamu sudah berusaha dengan baik.':hint?'Ini petunjuk untukmu!':'Kita coba bersama, ya!'}</div></div><div className="question-main"><div className="question-kicker"><span>{mode?.title}</span><span className="difficulty">{'★'.repeat(current.difficulty)}{'☆'.repeat(3-current.difficulty)}</span></div><h1>{current.prompt}</h1>{current.mode==='order'?<><p className="instruction">Pilih langkah sesuai urutan, lalu gunakan panah untuk mengatur posisi.</p><div className="order-pool">{questionList.filter(s=>!order.includes(s)).map((s,i)=><button className="option-card order-option" key={s} onClick={()=>chooseOrder(s)}><span className="option-number">{i+1}</span><StepIllustration step={s} size={42}/><span>{s}</span><Plus size={17}/></button>)}</div><div className="ordered-list"><h3>Urutan pilihanmu</h3>{order.map((s,i)=><div className="ordered-item" key={`${s}-${i}`}><b>{i+1}</b><StepIllustration step={s} size={42}/><span>{s}</span><button className="small-icon" aria-label={`Pindahkan ${s} ke atas`} onClick={()=>moveOrder(i,-1)} disabled={i===0}><ArrowLeft size={15}/></button><button className="small-icon" aria-label={`Pindahkan ${s} ke bawah`} onClick={()=>moveOrder(i,1)} disabled={i===order.length-1}><ArrowLeft style={{transform:'rotate(180deg)'}} size={15}/></button><button className="small-icon remove" aria-label={`Hapus ${s}`} onClick={()=>chooseOrder(s)}><X size={15}/></button></div>)}</div></>:<>{current.mode!=='odd'&&<div className="question-illustration"><div className="illustration-stage"><Artwork name={current.image} size={140} bare={true}/></div>{current.mode==='match'&&<span className="illustration-caption">Pilih dua gambar yang sama</span>}</div>}<p className="instruction">{current.mode==='match'?'Sentuh dua kartu yang memiliki nama sama.':current.mode==='odd'?'Pilih satu gambar yang berbeda.':'Pilih jawaban yang menurutmu tepat.'}</p><div className={`answer-grid ${current.mode==='match'?'match-grid':''}`}>{(current.mode==='match'?current.options:questionList).map((option,i)=><button key={`${option}-${i}`} className={`option-card ${chosen.includes(option)?'chosen':''} ${feedback==='correct'&&option===current.correct?'correct-option':''}`} onClick={()=>answer(option)} disabled={!!feedback} aria-pressed={chosen.includes(option)}><span className="option-number">{String.fromCharCode(65+i)}</span>{(current.mode==='match'||current.mode==='odd')&&picKey(option)&&<Pic name={option} size={72} bare={true}/>}<span className="option-label">{option}</span>{chosen.includes(option)&&<Check className="option-check-icon" size={17} strokeWidth={2.5}/>}</button>)}</div></>}
+  {hint&&<div className="hint-box"><CircleHelp size={18}/><span>{current.hint}</span></div>}{feedback&&<div className={`feedback ${feedback==='correct'?'success':'gentle'}`} role="status"><span className="feedback-symbol">{feedback==='correct'?'✓':'♡'}</span><span><b>{feedback==='correct'?'Hebat, kamu berhasil!':feedback==='reveal'?`Jawabannya: ${current.correct}`:'Ayo, kita coba lagi.'}</b><small>{feedback==='correct'?'Terus semangat, ya!':feedback==='reveal'?'Tidak apa-apa, setiap usaha itu berarti.':'Perhatikan gambar dan coba sekali lagi.'}</small></span></div>}
+  <div className="question-actions"><button className="btn btn-soft" onClick={hintAction}><CircleHelp size={18}/> Bantuan</button><button className="btn btn-soft" onClick={()=>speak(current.prompt)} disabled={!ttsAvailable||settings.quiet}><Volume2 size={18}/> Dengarkan</button>{current.mode==='order'&&!feedback&&<button className="btn btn-blue" onClick={orderCheck} disabled={order.length!==3}>Periksa Urutan <Check size={17}/></button>}{feedback==='try'&&<button className="btn btn-blue" onClick={retry}>Coba Lagi <RotateCcw size={17}/></button>}{feedback==='correct'||feedback==='reveal'?<button className="btn btn-gold" onClick={next}>{index===session.length-1?'Lihat Hasil':'Lanjut'}</button>:null}</div></div></section><div className="game-footnote">Tidak harus terburu-buru. Belajar dengan nyaman dan menyenangkan!</div></main>}
+  {screen==='pause'&&<main className="center-screen"><div className="pause-card"><Mascot pose="rest"/><h1>Kita istirahat sebentar, ya.</h1><p>Ambil waktu yang kamu perlukan. Permainan akan menunggu di sini.</p><div className="center-actions"><button className="btn btn-gold btn-large" onClick={()=>setScreen('game')}><Play size={18}/> Lanjut Bermain</button><button className="btn btn-outline-dark" onClick={goHome}><Home size={18}/> Kembali ke Beranda</button><button className="btn btn-soft" onClick={()=>update({quiet:!settings.quiet,sound:settings.quiet,voice:settings.quiet,music:false,minimalMotion:!settings.quiet})}>{settings.quiet?<Volume2 size={17}/>:<VolumeX size={17}/>} {settings.quiet?'Aktifkan Suara':'Mode Tenang'}</button></div></div></main>}
+  {screen==='result'&&<main className="center-screen"><div className="result-card"><MascotPair className="result-mascots"/><h1>Selamat! Kamu telah menyelesaikan permainan.</h1><p>Terima kasih sudah belajar dan bermain bersama.</p><div className="result-stats"><div><b>{completed}</b><span>Jawaban Benar</span></div><div><b>{session.length}</b><span>Aktivitas Dicoba</span></div>{settings.scoreEnabled&&<div><b>{score}</b><span>Total Poin</span></div>}</div>{settings.teams&&<div className="team-result">Skor kelompok: <b>{settings.teamNames[0]}</b> & <b>{settings.teamNames[1]}</b> bergantian bermain. Skor individu tidak dibandingkan.</div>}<div className="center-actions"><button className="btn btn-gold btn-large" onClick={()=>startGame(settings.modes)}><RotateCcw size={18}/> Main Lagi</button><button className="btn btn-outline-dark" onClick={()=>{setNotice(`Ringkasan sesi: ${completed} jawaban benar dari ${session.length} aktivitas. ${settings.scoreEnabled?`Skor ${score} poin.`:''}`);goHome();}}><Home size={18}/> Kembali ke Beranda</button><button className="btn btn-soft" onClick={()=>{const summary=`Ringkasan Kuis Santri\nTanggal: ${new Date().toLocaleDateString('id-ID')}\nAktivitas dicoba: ${session.length}\nJawaban benar: ${completed}\nSkor: ${score}\nCatatan: hasil ini bukan penilaian kemampuan anak.`;const blob=new Blob([summary],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='ringkasan-sesi-santri.txt';a.click();URL.revokeObjectURL(url);}}><Download size={17}/> Unduh Ringkasan Guru</button></div></div></main>}
+  {screen==='help'&&<div className="overlay" role="dialog" aria-modal="true" aria-labelledby="help-title"><div className="modal-card help-modal"><button className="modal-close" onClick={()=>setScreen('home')} aria-label="Tutup petunjuk"><X/></button><h1 id="help-title">Cara Bermain</h1><div className="help-list"><div><span>1</span><p><b>Pilih Permainan</b><small>Pilih satu atau beberapa mode yang kamu suka.</small></p></div><div><span>2</span><p><b>Amati Gambar</b><small>Baca instruksi, dengarkan suara, atau minta bantuan guru.</small></p></div><div><span>3</span><p><b>Pilih Jawaban</b><small>Sentuh kartu pilihan. Tidak ada batas waktu dalam menjawab.</small></p></div><div><span>4</span><p><b>Istirahat Jika Perlu</b><small>Tekan tombol Jeda kapan saja saat butuh rehat.</small></p></div></div><button className="btn btn-gold btn-large full" onClick={()=>setScreen('modes')}>Mengerti, Ayo Bermain</button></div></div>}
+  {screen==='settings'&&<div className="overlay" role="dialog" aria-modal="true" aria-labelledby="settings-title"><div className={`modal-card settings-modal ${pin!==settings.pin?'pin-gate-modal':''}`}><div className="modal-heading"><div><h1 id="settings-title">{pin===settings.pin?'Pengaturan Guru':'Akses Khusus'}</h1></div><button className="modal-close" onClick={()=>setScreen('home')} aria-label="Tutup pengaturan"><X/></button></div>{pin!==settings.pin&&<div className="pin-gate"><div className="pin-icon-wrap"><div className="pin-icon-medallion"><Lock size={26} strokeWidth={2.4}/></div></div><h2>Masukkan PIN Guru</h2><p className="pin-desc">Area ini dikhususkan untuk guru dan pendamping belajar santri.</p><div className="pin-default-chip"><Sparkles size={13}/> PIN awal perangkat: <b>1234</b></div><form className="pin-form" onSubmit={e=>{e.preventDefault();enterSettings();}}><input autoFocus type="password" inputMode="numeric" maxLength={12} value={pin} onChange={e=>setPin(e.target.value)} placeholder="••••" aria-label="PIN guru" className="pin-input-box"/>{pinError&&<div className="pin-error-alert" role="alert">{pinError}</div>}<div className="pin-actions"><button className="btn btn-gold btn-large pin-submit-btn" type="submit">Buka Pengaturan</button><button type="button" className="btn btn-soft pin-cancel-btn" onClick={()=>setScreen('home')}>Kembali ke Permainan</button></div></form></div>}{pin===settings.pin&&<><div className="settings-tabs">{[['game','Permainan'],['teams','Tim & Skor'],['audio','Audio'],['access','Aksesibilitas'],['data','Data & Sistem']].map(([id,label])=><button key={id} className={settingsTab===id?'active':''} onClick={()=>setSettingsTab(id)}>{label}</button>)}</div><div className="settings-content">{settingsTab==='game'&&<div className="setting-section"><h2>Atur Sesi Permainan</h2><p className="muted">Pilih jenis aktivitas yang ingin disertakan dalam sesi belajar santri.</p><div className="settings-mode-list">{modes.map(m=><label key={m.id} className="setting-check"><input type="checkbox" checked={settings.modes.includes(m.id)} onChange={e=>update({modes:e.target.checked?[...settings.modes,m.id]:settings.modes.filter(x=>x!==m.id)})}/><span>{m.title}</span></label>)}</div><div className="setting-grid"><label><span>Jumlah Soal</span><select value={settings.count} onChange={e=>update({count:+e.target.value})}>{[6,9,12,18,24,30,36].map(n=><option key={n}>{n} Soal</option>)}</select></label><label><span>Tingkat Kesulitan</span><select value={settings.difficulty} onChange={e=>update({difficulty:+e.target.value})}><option value="1">Mudah</option><option value="2">Sedang</option><option value="3">Semua Tingkat</option></select></label><label><span>Percobaan Menjawab</span><select value={settings.attempts} onChange={e=>update({attempts:+e.target.value})}>{[1,2,3,4,5].map(n=><option key={n} value={n}>{n} Kali</option>)}</select></label><label><span>Durasi Jeda Istirahat</span><select value={settings.breakSeconds} onChange={e=>update({breakSeconds:+e.target.value})}>{[0,10,15,30,60].map(n=><option key={n} value={n}>{n===0?'Bebas':n+' Detik'}</option>)}</select></label></div><Toggle label="Acak urutan soal" checked={settings.shuffle} onChange={v=>update({shuffle:v})}/><Toggle label="Lanjut otomatis setelah jawaban benar" checked={settings.autoNext} onChange={v=>update({autoNext:v})}/><p className="muted">Tidak ada batas waktu. Anak dapat menjawab dengan tenang dan guru bisa memberi jeda kapan saja.</p></div>}
+  {settingsTab==='teams'&&<div className="setting-section"><h2>Tim dan Penilaian</h2><Toggle label="Mode bermain kelompok (2 tim)" checked={settings.teams} onChange={v=>update({teams:v})}/><Toggle label="Tampilkan perolehan skor" checked={settings.scoreEnabled} onChange={v=>update({scoreEnabled:v})}/><div className="setting-grid"><label><span>Nama Tim 1</span><input value={settings.teamNames[0]} onChange={e=>update({teamNames:[e.target.value,settings.teamNames[1]]})}/></label><label><span>Nama Tim 2</span><input value={settings.teamNames[1]} onChange={e=>update({teamNames:[settings.teamNames[0],e.target.value]})}/></label><label><span>Poin per Jawaban Benar</span><input type="number" min="0" max="100" value={settings.points} onChange={e=>update({points:Math.max(0,Math.min(100,+e.target.value))})}/></label><label><span>Skor Awal</span><input type="number" min="0" max="10000" value={0} readOnly/></label></div><p className="muted">Skor hanya untuk suasana bermain, bukan ukuran kemampuan anak. Pergantian giliran berjalan bergantian pada setiap soal.</p></div>}
  {settingsTab==='audio'&&<div className="setting-section"><h2>Suara dan narasi</h2><Toggle label="Efek suara" checked={settings.sound&&!settings.quiet} onChange={v=>update({sound:v,quiet:!v?true:false})}/><Toggle label="Instruksi dibacakan (text-to-speech)" checked={settings.voice&&!settings.quiet} onChange={v=>update({voice:v,quiet:!v?settings.quiet:false})}/><Toggle label="Musik latar" checked={settings.music&&!settings.quiet} onChange={v=>update({music:v,quiet:!v?true:false})}/><label className="range-label">Volume <b>{settings.volume}%</b><input type="range" min="0" max="100" step="10" value={settings.volume} onChange={e=>update({volume:+e.target.value})}/></label><button className="btn btn-soft" onClick={()=>speak('Halo, selamat datang di permainan Kuis Santri.')} disabled={!ttsAvailable}><Volume2 size={17}/> Uji suara {ttsAvailable?'bahasa Indonesia':'(tidak didukung browser)'}</button><p className="muted">Audio tidak otomatis diputar saat halaman dibuka. Musik latar tersedia sebagai pengaturan, tetapi belum ada berkas musik bawaan.</p></div>}
  {settingsTab==='access'&&<div className="setting-section"><h2>Kebutuhan belajar</h2><Toggle label="Mode tenang (matikan suara dan animasi)" checked={settings.quiet} onChange={v=>update({quiet:v,sound:v?false:settings.sound,voice:v?false:settings.voice,music:false,minimalMotion:v?true:settings.minimalMotion})}/><Toggle label="Animasi minimal" checked={settings.minimalMotion} onChange={v=>update({minimalMotion:v})}/><Toggle label="Kontras tinggi" checked={settings.highContrast} onChange={v=>update({highContrast:v})}/><Toggle label="Bantuan visual" checked={settings.visualHints} onChange={v=>update({visualHints:v})}/><label className="range-label">Ukuran teks <b>{settings.textScale}%</b><input type="range" min="90" max="140" step="10" value={settings.textScale} onChange={e=>update({textScale:+e.target.value})}/></label><p className="muted">Guru dapat membacakan instruksi, membantu memilih kartu, atau memberi jeda. Semua soal dapat dimainkan tanpa berbicara.</p></div>}
  {settingsTab==='data'&&<div className="setting-section"><h2>Data dan sistem</h2><div className="system-status"><span className={online?'status-good':'status-warn'}>{online?<Wifi size={19}/>:<WifiOff size={19}/>}</span><div><b>{online?'Koneksi tersedia':'Sedang offline'}</b><small>{'Status aset lokal: ilustrasi dan data soal dibundel bersama aplikasi.'}</small></div></div><div className="system-status"><span className="status-good"><Check size={19}/></span><div><b>{'Text-to-speech '+(ttsAvailable?'tersedia':'tidak tersedia')}</b><small>Fitur suara bergantung pada dukungan browser dan suara bahasa Indonesia di perangkat.</small></div></div><div className="data-actions"><button className="btn btn-soft" onClick={exportSettings}><Download size={17}/> Ekspor pengaturan JSON</button><label className="btn btn-soft file-button"><Upload size={17}/> Impor pengaturan JSON<input type="file" accept="application/json,.json" onChange={e=>importSettings(e.target.files?.[0])}/></label><button className="btn btn-danger-soft" onClick={()=>{if(window.confirm('Kembalikan semua pengaturan ke setelan awal?')){setSettings(defaults);setNotice('Pengaturan dikembalikan ke setelan awal.');}}}><RotateCcw size={17}/> Reset pengaturan</button></div><p className="muted">Versi 1.0.0 · Tidak mengumpulkan data pribadi · Tidak mengirim hasil permainan ke server.</p></div>}

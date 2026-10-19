@@ -1,4 +1,4 @@
-export type ModeId = 'guess' | 'match';
+export type ModeId = 'guess' | 'match' | 'mixed';
 export type TopicId = 'perlengkapan' | 'tempat' | 'belajar' | 'kegiatan';
 export type Question = {
   id: string;
@@ -15,6 +15,7 @@ export type Question = {
 export const modes: { id: ModeId; title: string; description: string }[] = [
   { id: 'guess', title: 'Pilih gambar yang benar', description: 'Dengar atau baca pertanyaan, lalu pilih satu dari tiga gambar.' },
   { id: 'match', title: 'Pasangkan dua gambar', description: 'Ketuk satu gambar, lalu ketuk gambar yang sama.' },
+  { id: 'mixed', title: 'Gabungan dua permainan', description: 'Pilih gambar dan pasangkan gambar bergantian dalam satu sesi.' },
 ];
 
 export const topics: { id: TopicId; title: string }[] = [

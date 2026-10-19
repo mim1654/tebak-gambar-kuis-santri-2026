@@ -9,8 +9,8 @@ describe('bank soal belajar santri', () => {
     expect(new Set(questions.map((question) => question.id)).size).toBe(questions.length);
   });
 
-  it('hanya menyediakan dua mode permainan yang disepakati', () => {
-    expect(modes.map((mode) => mode.id)).toEqual(['guess', 'match']);
+  it('menyediakan dua permainan dan pilihan gabungan', () => {
+    expect(modes.map((mode) => mode.id)).toEqual(['guess', 'match', 'mixed']);
     expect(matchingItems.length).toBeGreaterThanOrEqual(4);
   });
 

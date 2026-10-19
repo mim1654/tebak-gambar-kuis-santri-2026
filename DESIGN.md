@@ -3,7 +3,7 @@
 **Status:** Dokumen Acuan Resmi (Design System Token & Palette)  
 **Dials:** ENERGY 2 / RHYTHM 2 / MOTION 1  
 
-Lihat acuan lengkap dalam bahasa Indonesia pada file [desain.md](file:///d:/PROJEK%20WEB/tebak-gambar-kuis-santri-2026/desain.md).
+Lihat acuan lengkap dalam bahasa Indonesia pada file [desain.md](desain.md).
 
 ---
 

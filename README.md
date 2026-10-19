@@ -1,33 +1,27 @@
-# Tebak Gambar & Kuis Santri — Hari Santri Nasional 2026
+# Belajar dan Bermain Bersama Santri
 
-Aplikasi web edukasi statis berbahasa Indonesia untuk kegiatan Hari Santri Nasional pada 22 Oktober 2026. Dibuat dengan React, TypeScript, Vite, SVG lokal, dan penyimpanan pengaturan di browser.
+Aplikasi web sederhana untuk mengenal Hari Santri dan kehidupan santri. Konten dirancang untuk digunakan bersama anak usia 6 sampai 18 tahun dengan kebutuhan belajar yang beragam, termasuk pengguna yang lebih nyaman belajar lewat gambar, teks, suara, atau sentuhan.
 
-## Fitur
+## Isi aplikasi
 
-- Enam mode: Tebak Gambar, Kuis Perilaku Baik, Pasangkan Gambar, Temukan yang Berbeda, Urutkan 3 Langkah, dan Mengenal Hari Santri.
-- 36 aktivitas lokal yang terbagi menjadi enam mode.
-- Pengaturan guru ber-PIN lokal (awal `1234`), mode kelompok, skor opsional, tingkat kesulitan, jumlah soal, percobaan ulang, dan pengaturan aksesibilitas.
-- Ekspor/impor pengaturan JSON dengan validasi tipe dasar.
-- Mode tenang, kontras tinggi, ukuran teks, text-to-speech bila didukung, fokus keyboard, dan target sentuh besar. Tidak ada batas waktu bawaan agar peserta dapat menjawab dengan tenang. Tidak ada batas waktu bawaan agar peserta dapat menjawab dengan tenang.
-- PWA/service worker untuk menyimpan aset aplikasi inti setelah kunjungan pertama.
-- Tidak ada backend, iklan, analitik, akun, atau pengiriman hasil permainan.
+- Dua permainan: memilih gambar dari tiga pilihan dan memasangkan dua pasang gambar dengan ketukan.
+- Empat topik: perlengkapan santri, tempat ibadah, Al-Qur’an dan belajar, serta kegiatan santri.
+- Pengajar memilih topik dan jumlah soal sampai 20.
+- Mode bermain sendiri atau dua tim. Dalam mode tim, kedua panel soal dan skor tampil bersamaan pada satu layar.
+- Jawaban benar pada percobaan pertama mendapat satu poin. Jawaban salah tidak mengurangi poin dan memberi satu kesempatan mencoba lagi.
+- Instruksi tetap terlihat dan dapat dibacakan dengan suara bahasa Indonesia dari browser. Suara dapat dimatikan.
+- Tidak ada hitung mundur.
 
-## Persyaratan
+## Menjalankan aplikasi
 
-- Node.js 22 atau versi LTS modern.
-- Browser modern (Chrome, Edge, Firefox, Safari versi terkini).
-- Koneksi internet untuk instalasi dependensi pertama kali dan kunjungan pertama ke aplikasi yang dipublikasikan.
+Gunakan Node.js versi LTS modern, lalu jalankan:
 
-## Menjalankan di komputer
+```bash
+npm ci
+npm run dev
+```
 
-1. Unduh dan ekstrak ZIP proyek.
-2. Pasang Node.js dari situs resmi Node.js jika belum ada.
-3. Buka terminal/Command Prompt di folder proyek.
-4. Jalankan `npm install`.
-5. Jalankan `npm run dev`.
-6. Buka alamat lokal yang dicetak terminal (biasanya `http://localhost:5173`).
-
-## Build dan preview
+Untuk memeriksa build produksi:
 
 ```bash
 npm test
@@ -35,54 +29,14 @@ npm run build
 npm run preview
 ```
 
-Build menghasilkan folder `dist/`. Untuk memastikan path deployment sesuai, workflow GitHub Actions membangun dengan `GITHUB_PAGES=true` dan base path `/tebak-gambar-kuis-santri-2026/`.
+GitHub Actions membangun aplikasi untuk GitHub Pages pada alamat proyek ini. Service worker menyimpan halaman yang sudah dibuka dan gambar yang dimuat. Suara narasi bergantung pada dukungan browser dan suara bahasa Indonesia yang tersedia pada perangkat.
 
-## Publikasi ke GitHub Pages
+## Aset gambar dan identitas
 
-1. Buat repository GitHub dengan nama **`tebak-gambar-kuis-santri-2026`** (atau sesuaikan `base` di `vite.config.ts` dan path pada workflow bila nama repository berbeda).
-2. Unggah seluruh isi folder proyek ke branch `main`, termasuk folder `.github/workflows`.
-3. Buka **Settings → Pages** pada repository.
-4. Pada **Build and deployment**, pilih **Source: GitHub Actions**.
-5. Buka tab **Actions**, tunggu workflow “Build and deploy to GitHub Pages” selesai dengan status hijau.
-6. Alamat publik biasanya `https://USERNAME.github.io/tebak-gambar-kuis-santri-2026/`.
-7. Jika repository memakai nama `USERNAME.github.io`, ubah base Vite menjadi `/` dan sesuaikan workflow sebelum build.
+Gambar benda yang tampil berasal dari gambar gabungan yang diberikan pemilik proyek dan dipisahkan menjadi kartu gambar individual. Logo PLP berasal dari pemilik proyek. Logo Hari Santri 2026 berasal dari pengumuman resmi Kementerian Agama; rincian sumber dan atribusi dicatat dalam `CREDITS.md`.
 
-## Bank soal
+## Catatan penggunaan
 
-Edit `src/data/questions.ts`. Setiap soal memiliki ID unik, mode, kategori, instruksi, jawaban, pilihan, nama aset, petunjuk, tingkat kesulitan, teks alternatif, dan status peninjauan (`reviewed`). Untuk soal mode `order`, isi `steps` dengan tiga langkah dalam urutan yang benar. `correct` juga disimpan untuk referensi soal.
+Kuis ini adalah alat belajar bersama, bukan penilaian kemampuan. Pengajar dapat membantu membacakan pertanyaan, memberi waktu tambahan, dan menghentikan permainan kapan saja. Suara hanya berjalan setelah pengguna menekan tombol dengar atau memilih jawaban.
 
-Mode `history` diberi `reviewed: false` karena materi Hari Santri dan representasi budaya/agama perlu ditinjau oleh guru sebelum kegiatan. Periksa kebenaran konten dan kesesuaian dengan peserta didik sebelum dipakai.
-
-## Menambahkan aset
-
-Ilustrasi dibuat secara lokal melalui komponen SVG di `src/components/Artwork.tsx`. Tambahkan bentuk SVG baru di sana dan gunakan nama ilustrasi tersebut pada properti `image` di data soal. Jangan memasukkan URL eksternal jika aplikasi harus tetap mandiri/offline. Untuk aset pihak ketiga, cantumkan sumber, pemilik, lisensi, dan perubahan dalam `CREDITS.md`.
-
-## Pengaturan guru
-
-Klik ikon roda gigi → masukkan PIN awal `1234`. PIN ini hanya mencegah perubahan tidak sengaja dan bukan mekanisme keamanan kuat. Pengaturan disimpan di `localStorage` browser. Gunakan tab **Data & sistem** untuk ekspor/impor JSON atau reset. Impor hanya menerima pengaturan yang dikenali dan tidak menjalankan kode.
-
-## Offline dan PWA
-
-Service worker didaftarkan pada build produksi dan menyimpan aset inti setelah kunjungan awal. Untuk mengetes secara lokal, jalankan `npm run build` lalu `npm run preview`, buka aplikasi saat online, tunggu hingga halaman termuat, kemudian gunakan DevTools → Network → Offline dan muat ulang. Browser dapat menghapus cache, dan pembaruan service worker bisa membutuhkan satu kali kunjungan online. Karena itu, uji pada perangkat yang benar-benar akan digunakan sebelum acara.
-
-## Aksesibilitas dan catatan penggunaan
-
-- Tidak ada batas waktu aktif secara default.
-- Pilihan jawaban dapat dioperasikan dengan keyboard dan sentuhan.
-- Mode mencocokkan menggunakan pemilihan kartu, bukan drag-and-drop wajib.
-- Instruksi audio bersifat tambahan; suara bergantung pada browser/perangkat.
-- Guru dapat membacakan instruksi, membantu memilih, dan memberi jeda.
-- Skor bukan ukuran tunggal keberhasilan belajar.
-
-## Batasan versi ini
-
-- Ilustrasi benda utama menggunakan SVG dengan gradasi dan detail yang lebih jelas. Bentuk dibuat besar di atas latar sederhana agar mudah dibedakan.
-- Timer tidak tersedia. Permainan tidak membatasi waktu; guru dapat memberi jeda kapan saja.
-- Musik latar dibuat secara sintetis oleh browser, tanpa berkas audio eksternal. Efek suara dan narasi dapat dimatikan melalui pengaturan.
-- Lanjut otomatis berfungsi setelah jawaban benar dengan jeda singkat. Matikan opsi ini bila peserta didik membutuhkan waktu untuk membaca umpan balik.
-- Pemilihan tim dan pergiliran tersedia. Skor tetap berupa skor sesi gabungan, bukan papan skor terpisah untuk masing-masing tim.
-- Bank soal mode sejarah ditandai perlu ditinjau oleh guru.
-
-## Lisensi
-
-Kode aplikasi menggunakan lisensi MIT (lihat `LICENSE`). Ilustrasi SVG dalam proyek ini dibuat khusus untuk proyek dan tersedia bersama kode dengan lisensi MIT. Font sistem digunakan agar aplikasi tidak bergantung pada CDN. Lihat `CREDITS.md`.
+Kode aplikasi menggunakan lisensi MIT. Lihat `CREDITS.md` untuk sumber gambar dan identitas.

@@ -1,8 +1,27 @@
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { modes, questions, getModeQuestions } from '../src/data/questions';
-describe('bank soal Kuis Santri',()=>{
- it('memiliki minimal 36 soal dengan ID unik',()=>{expect(questions.length).toBeGreaterThanOrEqual(36);expect(new Set(questions.map(q=>q.id)).size).toBe(questions.length);});
- it('setiap mode memiliki setidaknya enam soal',()=>{for(const mode of modes)expect(getModeQuestions(mode.id).length).toBeGreaterThanOrEqual(6);});
- it('semua soal memiliki jawaban dan petunjuk',()=>{for(const q of questions){expect(q.correct.length).toBeGreaterThan(0);expect(q.hint.length).toBeGreaterThan(0);expect(q.options.length).toBeGreaterThanOrEqual(2);}});
- it('urutan tiga langkah berisi tiga langkah',()=>{for(const q of getModeQuestions('order'))expect(q.steps).toHaveLength(3);});
+import { matchingItems, modes, questions, topics } from '../src/data/questions';
+
+describe('bank soal belajar santri', () => {
+  it('memiliki 20 soal dengan ID unik dan batas sesi tidak melebihi 20', () => {
+    expect(questions).toHaveLength(20);
+    expect(new Set(questions.map((question) => question.id)).size).toBe(questions.length);
+  });
+
+  it('hanya menyediakan dua mode permainan yang disepakati', () => {
+    expect(modes.map((mode) => mode.id)).toEqual(['guess', 'match']);
+    expect(matchingItems.length).toBeGreaterThanOrEqual(4);
+  });
+
+  it('memuat topik santri saja dan setiap soal memiliki petunjuk serta aset', () => {
+    expect(topics.map((topic) => topic.id)).toEqual(['perlengkapan', 'tempat', 'belajar', 'kegiatan']);
+    for (const question of questions) {
+      expect(question.prompt.length).toBeGreaterThan(0);
+      expect(question.answer.length).toBeGreaterThan(0);
+      expect(question.hint.length).toBeGreaterThan(0);
+      expect(existsSync(resolve(process.cwd(), 'public/images', question.image.includes('2026') ? 'brand' : 'quiz', question.image))).toBe(true);
+    }
+    expect(questions.some((question) => /cuci tangan|mencuci tangan/i.test(question.prompt))).toBe(false);
+  });
 });

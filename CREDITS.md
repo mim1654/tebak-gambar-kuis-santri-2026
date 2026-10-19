@@ -1,8 +1,7 @@
-# Kredit dan lisensi aset
+# Kredit dan atribusi
 
-- Ilustrasi masjid, objek perlengkapan, kartu perilaku, kalender, dan dua maskot: dibuat khusus untuk proyek ini dalam bentuk SVG lokal oleh pengembang proyek; lisensi MIT.
-- Ikon antarmuka: Lucide (`lucide-react`), lisensi ISC. Situs proyek: https://lucide.dev/ .
-- Font: menggunakan font sistem yang tersedia pada perangkat (Nunito jika telah terpasang, dengan fallback Trebuchet MS/Arial). Tidak ada font eksternal yang dimuat dari CDN.
-- Audio: tidak ada berkas musik atau efek suara pihak ketiga yang disertakan. Text-to-speech memakai kemampuan browser/perangkat dan ketersediaan suara bahasa Indonesia.
-
-Catatan: ilustrasi maskot adalah ilustrasi vektor bergaya kartun dengan shading sederhana, bukan gambar 3D fotorealistis. Konten terkait Hari Santri perlu diperiksa oleh guru sebelum digunakan.
+- Kartu foto untuk peci, sarung, sajadah, masjid, bedug, Al-Qur’an, tasbih, lentera, mukena, bendera, pensil, buku, kegiatan belajar, dan ruang salat: dipisahkan dari gambar gabungan yang diberikan oleh pemilik proyek untuk penggunaan dalam aplikasi ini.
+- Logo PLP: diberikan oleh pemilik proyek. Ditampilkan tanpa perubahan bentuk.
+- Logo Hari Santri 2026: Kementerian Agama Republik Indonesia. Sumber resmi: [Logo Hari Santri 2026](https://kemenag.go.id/nasional/logo-hari-santri-2026-resmi-dirilis-unduh-di-sini-pNcKF). Logo ditampilkan tanpa perubahan bentuk.
+- Suara: text-to-speech bawaan browser/perangkat, menggunakan bahasa Indonesia jika tersedia. Tidak ada rekaman suara pihak ketiga.
+- Kode aplikasi: lisensi MIT.

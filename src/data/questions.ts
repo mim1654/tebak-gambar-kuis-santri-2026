@@ -1,50 +1,52 @@
-export type ModeId = 'guess' | 'good' | 'match' | 'odd' | 'order' | 'history';
-export type Question = { id:string; mode:ModeId; category:string; prompt:string; correct:string; options:string[]; image:string; hint:string; difficulty:1|2|3; feedback:string; alt:string; reviewed:boolean; steps?:string[] };
-export const modes: {id:ModeId;title:string;description:string;symbol:string;color:string}[] = [
- {id:'guess',title:'Tebak Gambar',description:'Lihat gambar, lalu pilih namanya.',symbol:'peci',color:'blue'},
- {id:'good',title:'Kuis Perilaku Baik',description:'Pilih tindakan yang baik.',symbol:'helping',color:'green'},
- {id:'match',title:'Pasangkan Gambar',description:'Temukan dua gambar yang sama.',symbol:'pair',color:'gold'},
- {id:'odd',title:'Temukan yang Berbeda',description:'Cari gambar yang tidak sama.',symbol:'search',color:'brick'},
- {id:'order',title:'Urutkan 3 Langkah',description:'Susun langkah dari awal sampai akhir.',symbol:'steps',color:'blue'},
- {id:'history',title:'Mengenal Hari Santri',description:'Kenali Hari Santri dan pesantren.',symbol:'lantern',color:'green'}
+export type ModeId = 'guess' | 'match';
+export type TopicId = 'perlengkapan' | 'tempat' | 'belajar' | 'kegiatan';
+export type Question = {
+  id: string;
+  mode: ModeId;
+  topic: TopicId;
+  prompt: string;
+  answer: string;
+  image: string;
+  choices: string[];
+  alt: string;
+  hint: string;
+};
+
+export const modes: { id: ModeId; title: string; description: string }[] = [
+  { id: 'guess', title: 'Pilih gambar yang benar', description: 'Dengar atau baca pertanyaan, lalu pilih satu dari tiga gambar.' },
+  { id: 'match', title: 'Pasangkan dua gambar', description: 'Ketuk satu gambar, lalu ketuk gambar yang sama.' },
 ];
-const make = (mode:ModeId, id:string, prompt:string, correct:string, options:string[], image:string, hint:string, difficulty:1|2|3=1, alt=prompt, steps?:string[]):Question => ({id,mode,category:mode==='good'?'Perilaku baik':mode==='history'?'Hari Santri':'Perlengkapan dan lingkungan santri',prompt,correct,options,image,hint,difficulty,feedback:'Hebat, kamu sudah berusaha!',alt,reviewed:mode!=='history',steps});
+
+export const topics: { id: TopicId; title: string }[] = [
+  { id: 'perlengkapan', title: 'Perlengkapan santri' },
+  { id: 'tempat', title: 'Tempat ibadah' },
+  { id: 'belajar', title: 'Al-Qur’an dan belajar' },
+  { id: 'kegiatan', title: 'Kegiatan santri' },
+];
+
+const make = (id: string, topic: TopicId, answer: string, image: string, choices: string[], prompt: string, hint: string, alt = answer): Question => ({ id, mode: 'guess', topic, answer, image, choices, prompt, hint, alt });
+
 export const questions: Question[] = [
- make('guess','g01','Benda apa yang dipakai di kepala ini?','Peci',['Peci','Sarung','Sajadah','Bedug'],'peci','Biasanya berwarna hitam dan dipakai di kepala.'),
- make('guess','g02','Apa nama kain yang dipakai seperti rok ini?','Sarung',['Kitab','Sarung','Tasbih','Lentera'],'sarung','Kain ini sering dipakai saat beribadah.'),
- make('guess','g03','Apa nama alas untuk salat?','Sajadah',['Sajadah','Peci','Bedug','Bendera'],'sajadah','Alas ini digelar sebelum salat.'),
- make('guess','g04','Bangunan untuk beribadah ini bernama apa?','Masjid',['Pesantren','Masjid','Kelas','Perpustakaan'],'masjid','Ada tempat untuk salat di dalamnya.'),
- make('guess','g05','Benda yang dipukul dan berbunyi ini apa?','Bedug',['Lentera','Kitab','Bedug','Tasbih'],'bedug','Benda ini dapat menghasilkan bunyi besar.'),
- make('guess','g06','Benda untuk membaca dan belajar ini apa?','Kitab',['Sarung','Peci','Kitab','Mukena'],'kitab','Halaman-halamannya berisi tulisan.'),
- make('good','b01','Teman membawa banyak buku. Apa yang bisa kita lakukan?','Membantu teman',['Membantu teman','Mendorong teman','Menyembunyikan buku','Pergi menjauh'],'b01','Pilih tindakan yang membuat teman terbantu.'),
- make('good','b02','Selesai belajar, apa yang sebaiknya kita lakukan?','Merapikan alat belajar',['Meninggalkan semuanya','Merapikan alat belajar','Membuang buku','Mengacak meja'],'b02','Kembalikan barang ke tempatnya.'),
- make('good','b03','Melihat sampah di lantai, apa yang baik dilakukan?','Membuang sampah pada tempatnya',['Menendang sampah','Membuang sampah pada tempatnya','Membiarkannya','Menyebar sampah'],'b03','Jaga tempat belajar tetap bersih.'),
- make('good','b04','Saat teman berbicara, kita sebaiknya…','Mendengarkan',['Berteriak','Mendengarkan','Memotong pembicaraan','Menertawakan'],'b04','Beri kesempatan teman menyampaikan pesan.'),
- make('good','b05','Saat mengantre, kita sebaiknya…','Menunggu giliran',['Menyerobot','Mendorong','Menunggu giliran','Berlari ke depan'],'b05','Semua orang mendapat giliran.'),
- make('good','b06','Bagaimana menjaga buku dengan baik?','Menaruh buku dengan rapi',['Mencoret sembarang','Merobek halaman','Menaruh buku dengan rapi','Melempar buku'],'b06','Simpan buku agar tetap baik.'),
- make('match','m01','Pilih dua kartu dengan gambar yang sama.','Peci',['Peci','Peci','Sarung','Sajadah'],'peci','Cari gambar peci yang sama.'),
- make('match','m02','Temukan pasangan gambar masjid.','Masjid',['Masjid','Bedug','Masjid','Kitab'],'masjid','Dua gambar harus sama.'),
- make('match','m03','Pasangkan gambar sajadah yang sama.','Sajadah',['Sarung','Sajadah','Lentera','Sajadah'],'sajadah','Perhatikan bentuk alasnya.'),
- make('match','m04','Temukan pasangan gambar lentera.','Lentera',['Lentera','Peci','Tasbih','Lentera'],'lentera','Lentera memiliki bagian yang bercahaya.'),
- make('match','m05','Pasangkan gambar kitab yang sama.','Kitab',['Kitab','Mukena','Kitab','Bedug'],'kitab','Cari dua buku yang serupa.'),
- make('match','m06','Temukan pasangan gambar bedug.','Bedug',['Sarung','Bedug','Bedug','Bendera'],'bedug','Bentuknya seperti tabung besar.'),
- make('odd','o01','Tiga gambar sama, satu berbeda. Pilih yang berbeda.','Sarung',['Peci','Peci','Sarung','Peci'],'odd-peci','Tiga benda dipakai di kepala, satu berupa kain.'),
- make('odd','o02','Mana yang berbeda dari tiga buku?','Bedug',['Kitab','Kitab','Bedug','Kitab'],'odd-book','Satu benda bukan untuk dibaca.'),
- make('odd','o03','Cari benda yang bukan perlengkapan salat.','Bedug',['Sajadah','Mukena','Bedug','Peci'],'odd-prayer','Pikirkan fungsi setiap benda.'),
- make('odd','o04','Mana yang bukan sumber cahaya?','Sajadah',['Lentera','Lentera','Sajadah','Lentera'],'odd-light','Satu benda adalah alas, bukan lampu.'),
- make('odd','o05','Pilih yang berbeda dari tiga bangunan masjid.','Tasbih',['Masjid','Masjid','Tasbih','Masjid'],'odd-mosque','Satu benda bisa dipegang dan dihitung.'),
- make('odd','o06','Mana yang bukan alat belajar?','Sarung',['Kitab','Pensil','Buku','Sarung'],'odd-study','Tiga benda membantu kegiatan belajar.'),
- make('order','r01','Urutkan langkah merapikan buku.','Simpan di rak',['Ambil buku','Baca buku','Simpan di rak'],'steps-book','Pikirkan apa yang dilakukan setelah selesai membaca.',1,'Tiga langkah merapikan buku',['Ambil buku','Baca buku','Simpan di rak']),
- make('order','r02','Urutkan langkah menyiapkan alat belajar.','Letakkan buku dan pensil di meja',['Ambil buku','Siapkan pensil','Letakkan buku dan pensil di meja'],'books-desk','Siapkan buku dan pensil sebelum mulai belajar.',1,'Tiga langkah menyiapkan alat belajar',['Ambil buku','Siapkan pensil','Letakkan buku dan pensil di meja']),
- make('order','r03','Urutkan langkah menyiapkan sajadah.','Gelar sajadah',['Ambil sajadah','Cari tempat bersih','Gelar sajadah'],'steps-prayer','Cari tempat yang bersih sebelum menggelar sajadah.',1,'Tiga langkah menyiapkan sajadah',['Ambil sajadah','Cari tempat bersih','Gelar sajadah']),
- make('order','r04','Urutkan langkah menjaga kebersihan kelas.','Buang sampah',['Lihat sampah','Ambil sampah dengan aman','Buang sampah'],'steps-clean','Sampah dibuang setelah diambil dengan aman.',2,'Tiga langkah menjaga kebersihan',['Lihat sampah','Ambil sampah dengan aman','Buang sampah']),
- make('order','r05','Urutkan langkah meminjam buku.','Kembalikan buku',['Pilih buku','Baca buku','Kembalikan buku'],'steps-library','Buku dikembalikan setelah selesai digunakan.',1,'Tiga langkah menggunakan buku',['Pilih buku','Baca buku','Kembalikan buku']),
- make('order','r06','Urutkan langkah membantu teman.','Tanya bantuan yang diperlukan',['Dekati teman dengan sopan','Tanya bantuan yang diperlukan','Bantu jika teman setuju'],'steps-help','Mulailah dengan sopan dan tanyakan kebutuhannya.',2,'Tiga langkah membantu teman',['Dekati teman dengan sopan','Tanya bantuan yang diperlukan','Bantu jika teman setuju']),
- make('history','h01','Hari Santri Nasional diperingati setiap tanggal berapa?','22 Oktober',['22 Oktober','17 Agustus','1 Juni','10 November'],'calendar','Tanggal ini ada pada bulan Oktober.',1,'Kalender dengan tanggal 22 Oktober'),
- make('history','h02','Di mana santri biasanya belajar dan tinggal?','Pesantren',['Pasar','Pesantren','Stasiun','Pelabuhan'],'pesantren','Tempat belajar agama dan kehidupan bersama.',1,'Ilustrasi pesantren'),
- make('history','h03','Apa yang dapat kita lakukan bersama teman?','Belajar dan saling membantu',['Belajar dan saling membantu','Mengejek teman','Merusak barang','Berebut terus'],'helping','Pilih kegiatan yang membangun kebersamaan.',1,'Anak-anak saling membantu'),
- make('history','h04','Apa yang digunakan untuk membaca dan belajar?','Kitab atau buku',['Bola','Kitab atau buku','Sendok','Sepatu'],'kitab','Benda ini memiliki halaman untuk dibaca.',1,'Kitab atau buku'),
- make('history','h05','Hari Santri mengajak kita menghargai…','Semangat belajar dan kebaikan',['Semangat belajar dan kebaikan','Mengejek orang lain','Bertengkar','Membuang sampah'],'lantern','Pilih nilai yang baik untuk dilakukan setiap hari.',2,'Lentera dan suasana pesantren'),
- make('history','h06','Apa yang bisa membuat lingkungan belajar nyaman?','Menjaga kebersihan bersama',['Menjaga kebersihan bersama','Membuang sampah sembarangan','Berteriak terus','Merusak buku'],'clean','Kita bisa merawat lingkungan bersama-sama.',1,'Anak menjaga kebersihan')
+  make('q01','perlengkapan','Peci','peci.png',['Peci','Sajadah','Tasbih'],'Benda apa yang dipakai di kepala?','Bentuknya seperti topi kecil.','Peci hitam'),
+  make('q02','perlengkapan','Sarung','sarung.png',['Sarung','Peci','Kitab'],'Apa nama kain yang dipakai seperti rok?','Kain ini dililitkan di pinggang.','Sarung bermotif'),
+  make('q03','perlengkapan','Sajadah','sajadah.png',['Sajadah','Tasbih','Bedug'],'Apa nama alas untuk salat?','Alas ini digelar di lantai.','Sajadah untuk salat'),
+  make('q04','perlengkapan','Tasbih','tasbih.png',['Tasbih','Peci','Buku'],'Benda apa yang memiliki butiran untuk dihitung?','Butirannya dirangkai dengan tali.','Tasbih berbutir'),
+  make('q05','perlengkapan','Mukena','mukena.png',['Mukena','Sarung','Peci'],'Apa nama pakaian salat untuk perempuan?','Pakaian ini menutup kepala dan tubuh.','Mukena putih'),
+  make('q06','perlengkapan','Buku','buku.png',['Buku','Bedug','Lentera'],'Benda apa yang memiliki halaman untuk dibaca?','Halaman-halamannya berisi tulisan.','Buku belajar'),
+  make('q07','tempat','Masjid','masjid.png',['Masjid','Kelas','Rumah'],'Bangunan apa yang digunakan untuk salat berjemaah?','Bangunan ini memiliki ruang salat.','Masjid dengan kubah dan menara'),
+  make('q08','tempat','Ruang salat','prayer-space.png',['Ruang salat','Perpustakaan','Kantin'],'Di mana santri dapat salat di pesantren?','Tempat ini bersih dan tenang.','Ruang salat dengan sajadah'),
+  make('q09','belajar','Al-Qur’an','quran.png',['Al-Qur’an','Bola','Tasbih'],'Kitab suci umat Islam bernama apa?','Kitab ini dibaca untuk belajar dan beribadah.','Al-Qur’an di atas rehal'),
+  make('q10','belajar','Rehal','quran.png',['Rehal','Peci','Bedug'],'Apa nama penyangga untuk meletakkan Al-Qur’an?','Bentuknya dapat dilipat seperti huruf X.','Al-Qur’an di atas rehal kayu'),
+  make('q11','belajar','Pensil','pensil.png',['Pensil','Sarung','Mukena'],'Alat apa yang digunakan untuk menulis?','Ujungnya dapat digunakan untuk membuat tulisan.','Pensil kayu'),
+  make('q12','belajar','Meja belajar','books-desk.png',['Meja belajar','Masjid','Bedug'],'Di mana buku dapat diletakkan saat belajar?','Buku dan alat tulis dapat diletakkan di atasnya.','Buku di atas meja belajar'),
+  make('q13','kegiatan','Membaca Al-Qur’an','quran.png',['Membaca Al-Qur’an','Bermain bola','Tidur'],'Kegiatan apa yang dilakukan santri dengan Al-Qur’an?','Santri membuka halaman dan membaca.','Santri belajar membaca Al-Qur’an'),
+  make('q14','kegiatan','Salat','sajadah.png',['Salat','Menulis','Makan'],'Kegiatan ibadah apa yang dilakukan di atas sajadah?','Kegiatan ini dilakukan dengan gerakan ibadah.','Sajadah sebagai alas salat'),
+  make('q15','kegiatan','Belajar bersama','books-desk.png',['Belajar bersama','Berlomba lari','Memasak'],'Apa yang dapat dilakukan santri bersama di kelas?','Santri membaca dan belajar bersama guru.','Buku tersusun di meja belajar'),
+  make('q16','kegiatan','Hari Santri','hari-santri-2026.png',['Hari Santri','Hari Kemerdekaan','Hari Kartini'],'Hari apa yang diperingati pada 22 Oktober?','Namanya berkaitan dengan para santri.','Logo resmi Hari Santri 2026'),
+  make('q17','perlengkapan','Bedug','bedug.png',['Bedug','Pensil','Kitab'],'Benda apa yang dipukul dan berbunyi di masjid?','Bentuknya besar dan seperti tabung.','Bedug masjid'),
+  make('q18','perlengkapan','Bendera','bendera.png',['Bendera','Sajadah','Tasbih'],'Benda apa yang dikibarkan saat peringatan?','Benda ini memiliki warna merah dan putih.','Bendera Indonesia merah putih'),
+  make('q19','perlengkapan','Lentera','lentera.png',['Lentera','Buku','Sarung'],'Benda apa yang digunakan untuk menerangi?','Benda ini menghasilkan cahaya.','Lentera'),
+  make('q20','belajar','Kitab','buku.png',['Kitab','Bedug','Peci'],'Apa nama buku yang dipelajari santri?','Benda ini berisi halaman dan tulisan.','Kitab untuk belajar'),
 ];
-export const getModeQuestions = (mode:ModeId) => questions.filter(q=>q.mode===mode);
+
+export const matchingItems = questions.filter((q) => ['q01','q02','q03','q04','q05','q06','q07','q09','q11','q17','q18','q19'].includes(q.id));

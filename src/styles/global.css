@@ -30,7 +30,7 @@ img { display: block; max-width: 100%; }
 .brand { display: flex; gap: 12px; align-items: center; border: 0; background: transparent; color: var(--cream); font-size: 18px; font-weight: 700; text-align: left; min-height: 48px; padding: 0; }
 .brand img { width: 68px; height: 48px; object-fit: contain; }
 .identity-logos { margin-left: auto; }
-.identity-logos img { max-width: 92px; max-height: 56px; object-fit: contain; background: white; border-radius: 5px; }
+.identity-logos img { width: 112px; height: 62px; object-fit: contain; background: white; border-radius: 7px; padding: 2px; }
 .sound-toggle { min-height: 46px; padding: 8px 16px; border: 2px solid var(--cream); border-radius: 10px; color: var(--cream); background: var(--deep); font-weight: 600; }
 .page-width { width: min(1240px, calc(100% - 40px)); margin-inline: auto; }
 .home { padding-block: clamp(28px, 5vw, 68px); flex: 1; }
@@ -50,6 +50,8 @@ h1 { font-size: clamp(32px, 4.4vw, 58px); line-height: 1.13; letter-spacing: -.0
 .short-note { margin: 18px 0 0; color: var(--ink-soft); font-size: 15px; }
 .hero-photo { margin: 0; padding: 10px; border: 1px solid var(--line); border-radius: 22px; background: var(--paper); box-shadow: 0 7px 0 var(--deep); }
 .hero-photo img { width: 100%; aspect-ratio: 1.25; object-fit: contain; background: var(--cream); border-radius: 14px; }
+.hero-photo.hero-santri img { aspect-ratio: .78; object-fit: contain; animation: santri-float 4s ease-in-out infinite; }
+@keyframes santri-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
 .hero-photo figcaption { padding: 12px 8px 4px; color: var(--ink-soft); font-size: 15px; line-height: 1.45; }
 .mode-preview { margin-top: clamp(38px, 7vw, 88px); display: grid; grid-template-columns: .7fr 1fr 1fr; gap: 18px; align-items: stretch; }
 .mode-preview h2 { font-size: 24px; align-self: center; margin: 0; }
@@ -69,13 +71,15 @@ h1 { font-size: clamp(32px, 4.4vw, 58px); line-height: 1.13; letter-spacing: -.0
 .setup-page { max-width: 1050px; }
 .setup-section { padding: 22px 0; border-bottom: 1px solid var(--line); }
 .setup-section h2 { font-size: 23px; margin-bottom: 14px; }
-.choice-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.choice-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .choice { text-align: left; min-height: 120px; border: 2px solid var(--line); border-radius: 14px; background: var(--paper); padding: 18px; display: grid; align-content: start; gap: 8px; }
 .choice b { font-size: 19px; }
 .choice span { color: var(--ink-soft); line-height: 1.45; }
 .choice.chosen { border-color: var(--green); box-shadow: inset 0 0 0 2px var(--green); }
+.current-game-label { display: inline-flex; margin: 2px 0 10px; padding: 5px 10px; border-radius: 999px; background: var(--cream); color: var(--deep); font-size: 13px; font-weight: 800; }
 .topic-list { display: flex; flex-wrap: wrap; gap: 10px; }
 .topic-option, .team-option { min-height: 50px; padding: 9px 14px; display: inline-flex; align-items: center; gap: 11px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); font-weight: 600; }
+.team-help { flex-basis: 100%; margin: -12px 0 0; padding: 12px 16px; border-left: 5px solid var(--blue); border-radius: 8px; background: var(--paper); color: var(--midnight); line-height: 1.5; }
 input[type='checkbox'] { width: 23px; height: 23px; accent-color: var(--green); }
 .setup-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 24px; }
 .setup-controls label:first-child { display: flex; align-items: center; gap: 14px; font-size: 18px; font-weight: 700; }
@@ -132,13 +136,14 @@ select { min-height: 48px; min-width: 120px; padding: 8px 12px; border: 1px soli
   .mode-preview h2 { grid-column: 1 / -1; }
   .materials-list { grid-template-columns: 1fr; }
   .team-grid.two-teams { grid-template-columns: 1fr; }
+  .choice-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .team-grid.two-teams .answer-card .picture { height: clamp(110px, 20vw, 180px); }
 }
 @media (max-width: 650px) {
   .topbar { min-height: 66px; padding: 8px 12px; gap: 9px; }
   .brand { font-size: 15px; gap: 7px; }
   .brand img { width: 48px; height: 38px; }
-  .identity-logos img { max-width: 58px; max-height: 40px; }
+  .identity-logos img { width: 64px; height: 44px; }
   .sound-toggle { min-height: 42px; padding: 6px 8px; font-size: 13px; }
   .page-width { width: min(100% - 24px, 560px); }
   .home { padding-block: 26px 40px; }
@@ -146,6 +151,7 @@ select { min-height: 48px; min-width: 120px; padding: 8px 12px; border: 1px soli
   h1 { font-size: clamp(31px, 9vw, 42px); }
   .intro { font-size: 17px; }
   .hero-photo img { aspect-ratio: 1.4; }
+  .hero-photo.hero-santri img { aspect-ratio: .88; }
   .mode-preview { grid-template-columns: 1fr; margin-top: 36px; }
   .mode-preview h2 { grid-column: auto; }
   .mode-preview article { padding: 16px; }

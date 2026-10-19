@@ -48,7 +48,7 @@ describe('alur aplikasi santri', () => {
     click(buttonByText('Kembali ke beranda'));
     click(buttonByText('Mulai bermain'));
     expect(document.body.textContent).toContain('Siapkan permainan');
-    expect(document.querySelectorAll('.choice')).toHaveLength(2);
+    expect(document.querySelectorAll('.choice')).toHaveLength(3);
     expect(document.querySelectorAll('.topic-option')).toHaveLength(4);
   });
 
@@ -127,5 +127,19 @@ describe('alur aplikasi santri', () => {
     expect(secondPanel.querySelector('.team-heading strong')?.textContent).toBe('0 poin');
     click(secondPanel.querySelector('.answer-state button'));
     expect(document.body.textContent).toContain('Tim 1 mendapat poin lebih banyak.');
+  });
+
+  it('menggabungkan kedua jenis permainan dalam satu sesi', () => {
+    startAtSetup();
+    click(buttonByText('Gabungan dua permainan'));
+    pickCount('2');
+    click(buttonByText('Mulai bermain'));
+    expect(document.body.textContent).toContain('Permainan gabungan');
+    expect(document.querySelectorAll('.answer-card')).toHaveLength(3);
+    const firstPrompt = document.querySelector('.team-panel .prompt-row p')?.textContent ?? '';
+    const firstQuestion = questions.find((item) => item.prompt === firstPrompt);
+    click([...document.querySelectorAll('.answer-card')].find((card) => card.textContent?.trim() === firstQuestion?.answer) ?? null);
+    click(buttonByText('Soal berikutnya'));
+    expect(document.querySelectorAll('.match-card')).toHaveLength(4);
   });
 });

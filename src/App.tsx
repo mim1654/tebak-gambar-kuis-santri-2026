@@ -114,8 +114,8 @@ function App(){
      <div className="material-copy"><span className="material-number">MATERI 1</span><h2>Merawat buku belajar</h2><p>Buku membantu kita belajar. Gunakan dengan hati-hati, lalu simpan kembali di tempatnya.</p><div className="material-tip"><b>Ayo lakukan:</b> Setelah membaca, letakkan buku di rak.</div><button className="btn btn-outline material-button" onClick={()=>{update({modes:['guess']});startGame(['guess']);}}>Coba kuis gambar</button></div>
     </article>
     <article className="material-card material-card-compact">
-     <div className="material-art"><Artwork name="clean" size={112} bare={true}/></div>
-     <div className="material-copy"><span className="material-number">MATERI 2</span><h2>Menjaga kebersihan</h2><p>Buang sampah ke tempat sampah dan jaga ruang belajar bersama.</p><div className="material-tip"><b>Ayo lakukan:</b> Rapikan satu benda di sekitarmu.</div><button className="btn btn-outline material-button" onClick={()=>{update({modes:['good']});startGame(['good']);}}>Coba kuis adab baik</button></div>
+     <div className="material-art"><Pic name="wash-hands" size={112} alt="Tangan mencuci dengan sabun" bare={true}/></div>
+     <div className="material-copy"><span className="material-number">MATERI 2</span><h2>Mencuci tangan</h2><p>Basahi tangan, gosok dengan sabun, bilas, lalu keringkan sampai bersih.</p><div className="material-tip"><b>Ayo lakukan:</b> Cuci tangan sebelum makan.</div><button className="btn btn-outline material-button" onClick={()=>{update({modes:['order']});startGame(['order']);}}>Coba urutan cuci tangan</button></div>
     </article>
     <article className="material-card material-card-compact">
      <div className="material-art"><Artwork name="helping" size={112} bare={true}/></div>
@@ -124,6 +124,10 @@ function App(){
     <article className="material-card material-card-compact">
      <div className="material-art"><Artwork name="queue" size={112} bare={true}/></div>
      <div className="material-copy"><span className="material-number">MATERI 4</span><h2>Menunggu giliran</h2><p>Ketika teman berbicara atau bermain, tunggu sampai giliranmu tiba.</p><div className="material-tip"><b>Ayo lakukan:</b> Dengarkan teman sampai selesai.</div><button className="btn btn-outline material-button" onClick={()=>{update({modes:['good']});startGame(['good']);}}>Coba kuis adab baik</button></div>
+    </article>
+    <article className="material-card material-card-compact">
+     <div className="material-art"><Pic name="prayer-space" size={112} alt="Sajadah di tempat salat yang bersih" bare={true}/></div>
+     <div className="material-copy"><span className="material-number">MATERI 5</span><h2>Menyiapkan sajadah</h2><p>Cari tempat yang bersih, lalu gelar sajadah dengan rapi.</p><div className="material-tip"><b>Ayo lakukan:</b> Minta bantuan guru bila perlu.</div><button className="btn btn-outline material-button" onClick={()=>{update({modes:['order']});startGame(['order']);}}>Coba urutan menyiapkan sajadah</button></div>
     </article>
    </div>
    <div className="materials-footer"><MascotPair/><p><b>Belajar pelan-pelan itu boleh.</b><br/>Pilih satu materi dulu, lalu lanjut saat kamu siap.</p></div>

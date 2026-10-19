@@ -127,7 +127,7 @@ const extraArt: Record<string, ReactNode> = {
 
 const stepAsset: Record<string, string> = {
   'Ambil buku': 'steps-choose-book', 'Baca buku': 'steps-book', 'Simpan di rak': 'steps-library',
-  'Basahi tangan': 'steps-hands', 'Pakai sabun dan gosok': 'steps-hands', 'Keringkan tangan': 'steps-hands',
+  'Basahi tangan': 'steps-hands', 'Pakai sabun, gosok, dan bilas': 'wash-hands', 'Keringkan tangan': 'steps-hands',
   'Ambil sajadah': 'sajadah', 'Cari tempat bersih': 'steps-place', 'Gelar sajadah': 'steps-prayer',
   'Lihat sampah': 'b03', 'Ambil sampah dengan aman': 'b03', 'Buang sampah': 'b03',
   'Pilih buku': 'steps-choose-book', 'Kembalikan buku': 'steps-library',
@@ -158,9 +158,33 @@ const behaviorArt: Record<string, ReactNode> = {
   b06: <><rect x="21" y="24" width="78" height="75" rx="4" fill="#c48d54" stroke="#805b37" strokeWidth="3"/><path d="M20 57h80M20 82h80" stroke="#805b37" strokeWidth="4"/><path d="M29 31h11v23H29zm15-3h12v26H44zm18 5h12v21H62zm18-2h13v23H80zM28 62h12v17H28zm17 2h13v15H45zm18-3h11v18H63zm17 2h13v16H80zm-51 23h12v11H29zm17-3h13v14H46zm18 1h13v13H64z" fill="#477f9a" stroke="#315a70" strokeWidth="1.5"/></>
 };
 
+const photoAssets: Record<string, { src: string; label: string }> = {
+  peci: { src: './images/quiz/peci.webp', label: 'Peci hitam' },
+  sarung: { src: './images/quiz/sarung.webp', label: 'Sarung' },
+  sajadah: { src: './images/quiz/sajadah.webp', label: 'Sajadah' },
+  masjid: { src: './images/quiz/masjid.webp', label: 'Masjid' },
+  bedug: { src: './images/quiz/bedug.webp', label: 'Bedug' },
+  kitab: { src: './images/quiz/kitab.webp', label: 'Kitab terbuka' },
+  tasbih: { src: './images/quiz/tasbih.webp', label: 'Tasbih' },
+  lentera: { src: './images/quiz/lentera.webp', label: 'Lentera' },
+  mukena: { src: './images/quiz/mukena.webp', label: 'Mukena' },
+  bendera: { src: './images/quiz/bendera.webp', label: 'Bendera Indonesia' },
+  pensil: { src: './images/quiz/pensil.webp', label: 'Pensil' },
+  buku: { src: './images/quiz/buku.webp', label: 'Buku' },
+  'helping-books': { src: './images/quiz/helping-books.webp', label: 'Anak membantu membawa buku' },
+  'books-desk': { src: './images/quiz/books-desk.webp', label: 'Buku tersusun rapi di meja' },
+  'wash-hands': { src: './images/quiz/wash-hands.webp', label: 'Tangan dicuci dengan sabun' },
+  'prayer-space': { src: './images/quiz/prayer-space.webp', label: 'Sajadah di tempat salat yang bersih' },
+};
+const photoAliases: Record<string, string> = {
+  helping: 'helping-books', b01: 'helping-books',
+  tidy: 'books-desk', b02: 'books-desk', bookcare: 'books-desk', b06: 'books-desk',
+};
+const photoFor = (key: string) => photoAssets[photoAliases[key] || key];
+
 export const picKey = (label: string) => {
   const k = label.trim().toLowerCase().replace(/^kitab atau buku$/, 'kitab');
-  return k !== 'pesantren' && (art[k] || extraArt[k] || emoji[k] || behaviorArt[k] || sceneTiles[k]) ? k : '';
+  return k !== 'pesantren' && (photoFor(k) || art[k] || extraArt[k] || emoji[k] || behaviorArt[k] || sceneTiles[k]) ? k : '';
 };
 
 const sceneToBehavior: Record<string, string> = {
@@ -170,6 +194,10 @@ const sceneToBehavior: Record<string, string> = {
 
 export function Pic({ name, size = 112, alt, bare = false }: { name: string; size?: number; alt?: string; bare?: boolean }) {
   const k = name.toLowerCase();
+  const photo = photoFor(k);
+  if (photo) {
+    return <img className="pic-photo" src={photo.src} width={size} height={size} alt={alt || photo.label} loading="lazy" decoding="async" draggable={false}/>;
+  }
   if (art[k]) {
     return (
       <svg role="img" aria-label={alt || art[k].label} viewBox="0 0 120 120" width={size} height={size} focusable="false">

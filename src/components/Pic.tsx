@@ -127,7 +127,7 @@ const extraArt: Record<string, ReactNode> = {
 
 const stepAsset: Record<string, string> = {
   'Ambil buku': 'steps-choose-book', 'Baca buku': 'steps-book', 'Simpan di rak': 'steps-library',
-  'Basahi tangan': 'steps-hands', 'Pakai sabun, gosok, dan bilas': 'wash-hands', 'Keringkan tangan': 'steps-hands',
+  'Siapkan pensil': 'pensil', 'Letakkan buku dan pensil di meja': 'books-desk',
   'Ambil sajadah': 'sajadah', 'Cari tempat bersih': 'steps-place', 'Gelar sajadah': 'steps-prayer',
   'Lihat sampah': 'b03', 'Ambil sampah dengan aman': 'b03', 'Buang sampah': 'b03',
   'Pilih buku': 'steps-choose-book', 'Kembalikan buku': 'steps-library',
@@ -173,7 +173,6 @@ const photoAssets: Record<string, { src: string; label: string }> = {
   buku: { src: './images/quiz/buku.webp', label: 'Buku' },
   'helping-books': { src: './images/quiz/helping-books.webp', label: 'Anak membantu membawa buku' },
   'books-desk': { src: './images/quiz/books-desk.webp', label: 'Buku tersusun rapi di meja' },
-  'wash-hands': { src: './images/quiz/wash-hands.webp', label: 'Tangan dicuci dengan sabun' },
   'prayer-space': { src: './images/quiz/prayer-space.webp', label: 'Sajadah di tempat salat yang bersih' },
 };
 const photoAliases: Record<string, string> = {

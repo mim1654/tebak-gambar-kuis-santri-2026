@@ -114,8 +114,8 @@ function App(){
      <div className="material-copy"><span className="material-number">MATERI 1</span><h2>Merawat buku belajar</h2><p>Buku membantu kita belajar. Gunakan dengan hati-hati, lalu simpan kembali di tempatnya.</p><div className="material-tip"><b>Ayo lakukan:</b> Setelah membaca, letakkan buku di rak.</div><button className="btn btn-outline material-button" onClick={()=>{update({modes:['guess']});startGame(['guess']);}}>Coba kuis gambar</button></div>
     </article>
     <article className="material-card material-card-compact">
-     <div className="material-art"><Pic name="wash-hands" size={112} alt="Tangan mencuci dengan sabun" bare={true}/></div>
-     <div className="material-copy"><span className="material-number">MATERI 2</span><h2>Mencuci tangan</h2><p>Basahi tangan, gosok dengan sabun, bilas, lalu keringkan sampai bersih.</p><div className="material-tip"><b>Ayo lakukan:</b> Cuci tangan sebelum makan.</div><button className="btn btn-outline material-button" onClick={()=>{update({modes:['order']});startGame(['order']);}}>Coba urutan cuci tangan</button></div>
+     <div className="material-art"><Pic name="books-desk" size={112} alt="Buku tersusun rapi di meja belajar" bare={true}/></div>
+     <div className="material-copy"><span className="material-number">MATERI 2</span><h2>Menyiapkan alat belajar</h2><p>Siapkan buku dan pensil di meja sebelum mulai belajar.</p><div className="material-tip"><b>Ayo lakukan:</b> Letakkan perlengkapan belajar dengan rapi.</div><button className="btn btn-outline material-button" onClick={()=>{update({modes:['order']});startGame(['order']);}}>Coba urutan menyiapkan alat belajar</button></div>
     </article>
     <article className="material-card material-card-compact">
      <div className="material-art"><Artwork name="helping" size={112} bare={true}/></div>

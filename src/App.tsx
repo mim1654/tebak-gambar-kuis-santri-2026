@@ -128,7 +128,7 @@ function App() {
           <p className="short-note">Tidak ada batas waktu. Boleh mendengar, membaca, dan mencoba lagi.</p></div>
       <figure className="hero-photo hero-santri"><img src={imageUrl('santri-pair.png')} alt="Anak santri laki-laki dan perempuan menyapa dengan ramah" /><figcaption>Belajar dan beribadah bersama teman.</figcaption></figure>
       </section>
-      <section className="mode-preview" aria-label="Dua pilihan permainan"><h2>Dua cara bermain</h2>{modes.map((item, index) => <article key={item.id}><span className="mode-number">0{index + 1}</span><div><h3>{item.title}</h3><p>{item.description}</p></div></article>)}</section>
+      <section className="mode-preview" aria-label="Pilihan permainan"><h2>Pilih cara bermain</h2>{modes.map((item, index) => <article key={item.id}><span className="mode-number">0{index + 1}</span><div><h3>{item.title}</h3><p>{item.description}</p></div></article>)}</section>
     </main>}
 
     {screen === 'materials' && <main className="page-width subpage"><button className="text-button" onClick={goHome}>Kembali ke beranda</button><h1>Materi singkat tentang santri</h1><p className="intro">Baca bersama. Satu kalimat pendek untuk setiap gambar.</p><div className="materials-list">

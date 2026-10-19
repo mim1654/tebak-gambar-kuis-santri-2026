@@ -1,310 +1,169 @@
-import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, BookOpen, Check, CircleHelp, Home, Pause, Play, RotateCcw, Settings, Volume2, VolumeX, X, Download, Upload, Trophy, Wifi, WifiOff, Plus, Minus, Sparkles, Users, Layers, Lock } from 'lucide-react';
-import { Artwork, Mascot, MascotPair } from './components/Artwork';
-import { Pic, picKey, StepIllustration } from './components/Pic';
-import { playSfx, startMusic, stopMusic, unlockAudio } from './lib/audio';
-import { getModeQuestions, modes, questions, type ModeId, type Question } from './data/questions';
+import { useMemo, useState } from 'react';
+import { matchingItems, modes, questions, topics, type ModeId, type Question, type TopicId } from './data/questions';
 
-type SettingsType = { modes:ModeId[]; count:number; difficulty:number; shuffle:boolean; autoNext:boolean; attempts:number; teams:boolean; teamNames:string[]; teamColors:string[]; scoreEnabled:boolean; points:number; sound:boolean; voice:boolean; music:boolean; volume:number; quiet:boolean; minimalMotion:boolean; highContrast:boolean; textScale:number; breakSeconds:number; visualHints:boolean; pin:string };
-const defaults:SettingsType = {modes:['guess','good','match','odd','order','history'],count:12,difficulty:1,shuffle:true,autoNext:false,attempts:3,teams:false,teamNames:['Tim Bintang','Tim Lentera'],teamColors:['#2F7FC1','#1F8A5B'],scoreEnabled:true,points:10,sound:true,voice:false,music:false,volume:60,quiet:false,minimalMotion:false,highContrast:false,textScale:100,breakSeconds:15,visualHints:true,pin:'1234'};
-const readSettings = ():SettingsType => { try { const v=localStorage.getItem('santri-settings'); if(v){const p=JSON.parse(v); return {...defaults,...p,modes:Array.isArray(p.modes)?p.modes:defaults.modes};} } catch {} return defaults; };
-const shuffle = <T,>(arr:T[]) => [...arr].sort(()=>Math.random()-.5);
-function App(){
- const [settings,setSettings]=useState<SettingsType>(readSettings); const [screen,setScreen]=useState<'home'|'modes'|'materials'|'game'|'pause'|'result'|'settings'|'help'>('home');
- const [session,setSession]=useState<Question[]>([]); const [index,setIndex]=useState(0); const [score,setScore]=useState(0); const [attempt,setAttempt]=useState(0); const [chosen,setChosen]=useState<string[]>([]); const [order,setOrder]=useState<string[]>([]); const [feedback,setFeedback]=useState(''); const [hint,setHint]=useState(false); const [completed,setCompleted]=useState(0); const [,setTeam]=useState(0); const [round,setRound]=useState(1); const [pin,setPin]=useState(''); const [pinError,setPinError]=useState(''); const [settingsTab,setSettingsTab]=useState('game'); const [notice,setNotice]=useState(''); const [online,setOnline]=useState(navigator.onLine); const [ttsAvailable,setTtsAvailable]=useState(false);
- useEffect(()=>{try{localStorage.setItem('santri-settings',JSON.stringify(settings));}catch{setNotice('Penyimpanan lokal tidak tersedia. Pengaturan berlaku selama halaman ini terbuka.');}},[settings]);
- useEffect(()=>{const on=()=>setOnline(true),off=()=>setOnline(false);window.addEventListener('online',on);window.addEventListener('offline',off);setTtsAvailable('speechSynthesis'in window);return()=>{window.removeEventListener('online',on);window.removeEventListener('offline',off);};},[]);
- useEffect(()=>{document.documentElement.dataset.contrast=settings.highContrast?'high':'normal';document.documentElement.dataset.motion=settings.minimalMotion||settings.quiet?'reduced':'normal';document.documentElement.style.setProperty('--text-scale',`${settings.textScale}%`);},[settings.highContrast,settings.minimalMotion,settings.quiet,settings.textScale]);
- const current=session[index];
- const mode=current?modes.find(m=>m.id===current.mode):undefined;
- const update=(patch:Partial<SettingsType>)=>setSettings(s=>({...s,...patch}));
- const startGame=(modeIds=settings.modes)=>{let qs=questions.filter(q=>modeIds.includes(q.mode)&&q.difficulty<=Math.max(1,settings.difficulty));if(!qs.length)qs=questions.filter(q=>modeIds.includes(q.mode));if(settings.shuffle)qs=shuffle(qs);qs=qs.slice(0,Math.min(settings.count,qs.length));setSession(qs);setIndex(0);setScore(0);setAttempt(0);setChosen([]);setOrder([]);setFeedback('');setHint(false);setCompleted(0);setRound(1);setTeam(0);setScreen('game');};
- const speak=(text:string)=>{if(!settings.voice||settings.quiet||!('speechSynthesis'in window))return;window.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(text);utterance.lang='id-ID';utterance.rate=0.88;window.speechSynthesis.speak(utterance);};
- const next=()=>{if(index+1>=session.length){setScreen('result');return;}setIndex(i=>i+1);setAttempt(0);setChosen([]);setOrder([]);setFeedback('');setHint(false);if((index+1)%6===0)setRound(r=>r+1);if(settings.teams)setTeam(t=>1-t);};
- useEffect(()=>{if(feedback!=='correct'||!settings.autoNext)return;const timer=window.setTimeout(()=>{if(index+1>=session.length)setScreen('result');else next();},1400);return()=>window.clearTimeout(timer);},[feedback,settings.autoNext,index,session.length]);
- const sfx=(k:'tap'|'correct'|'wrong'|'win')=>{if(settings.sound&&!settings.quiet)playSfx(k,settings.volume);};
- useEffect(()=>{const on=screen==='game'&&settings.music&&!settings.quiet;if(on)startMusic(settings.volume);else stopMusic();return stopMusic;},[screen,settings.music,settings.quiet,settings.volume]);
- useEffect(()=>{if(screen==='result')sfx('win');},[screen]);
- useEffect(()=>{const u=()=>unlockAudio();window.addEventListener('pointerdown',u,{once:true});return()=>window.removeEventListener('pointerdown',u);},[]);
- const answer=(value:string)=>{if(feedback)return;sfx('tap'); if(current.mode==='match'){const nextChosen=[...chosen,value];setChosen(nextChosen);if(nextChosen.length<2)return;const ok=nextChosen[0]===nextChosen[1];resolve(ok);return;}resolve(value===current.correct);};
- const resolve=(ok:boolean)=>{if(ok){setFeedback('correct');setCompleted(c=>c+1);if(settings.scoreEnabled)setScore(s=>s+settings.points);sfx('correct');speak('Hebat, kamu berhasil!');}else{const nextAttempt=attempt+1;setAttempt(nextAttempt);sfx('wrong');if(nextAttempt>=settings.attempts){setFeedback('reveal');}else{setFeedback('try');speak('Ayo, kita coba lagi.');}}};
- const retry=()=>{setFeedback('');setChosen([]);};
- const orderCheck=()=>{if(!current.steps)return;const ok=order.join('|')===current.steps.join('|');resolve(ok);};
- const chooseOrder=(step:string)=>{if(order.includes(step))setOrder(o=>o.filter(s=>s!==step));else if(order.length<3)setOrder(o=>[...o,step]);};
- const moveOrder=(i:number,delta:number)=>setOrder(old=>{const n=[...old],j=i+delta;if(j<0||j>=n.length)return old;[n[i],n[j]]=[n[j],n[i]];return n;});
- const hintAction=()=>{setHint(true);speak(current?.hint||'Perhatikan gambarnya.');};
- const openSettings=()=>{setPin('');setPinError('');setScreen('settings');};
- const enterSettings=()=>{if(pin===settings.pin){setPinError('');setSettingsTab('game');}else setPinError('PIN belum tepat. Coba lagi atau minta bantuan pengelola.');};
- const exportSettings=()=>{const blob=new Blob([JSON.stringify(settings,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='pengaturan-kuis-santri.json';a.click();URL.revokeObjectURL(url);};
- const importSettings=(file?:File)=>{if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const v=JSON.parse(String(reader.result));if(!v||typeof v!=='object'||!Array.isArray(v.modes)||!v.modes.every((m:string)=>modes.some(x=>x.id===m)))throw new Error('format');const safe:Partial<SettingsType>={};if(Number.isFinite(v.count))safe.count=Math.max(1,Math.min(36,Math.round(v.count)));if(Number.isFinite(v.difficulty))safe.difficulty=Math.max(1,Math.min(3,Math.round(v.difficulty)));if(typeof v.shuffle==='boolean')safe.shuffle=v.shuffle;if(typeof v.autoNext==='boolean')safe.autoNext=v.autoNext;if(Number.isFinite(v.attempts))safe.attempts=Math.max(1,Math.min(5,Math.round(v.attempts)));if(typeof v.teams==='boolean')safe.teams=v.teams;if(typeof v.scoreEnabled==='boolean')safe.scoreEnabled=v.scoreEnabled;if(typeof v.points==='number')safe.points=Math.max(0,Math.min(100,v.points));safe.modes=v.modes;update(safe);setNotice('Pengaturan berhasil diimpor.');}catch{setNotice('File tidak sesuai format pengaturan aplikasi. Tidak ada kode yang dijalankan.');}};reader.readAsText(file);};
- const questionList=useMemo(()=>current?.mode==='order'&&current.steps?shuffle(current.steps):current?.options?(settings.shuffle?shuffle(current.options):current.options):[],[current?.id,settings.shuffle]);
- const goHome=()=>{setScreen('home');setFeedback('');setChosen([]);setOrder([]);};
- return <div className="app-shell">
-  <header className="topbar">
-   <button className="brand" onClick={goHome} aria-label="Kembali ke beranda">
-    <span className="brand-mark"><Artwork name="lentera" size={26}/></span>
-    <span><b>KUIS SANTRI</b><small>HSN : 2026</small></span>
-   </button>
-   <div className="top-actions">
-    <span className={`status ${online?'':'offline'}`}>
-     {online ? <Wifi size={15}/> : <WifiOff size={15}/>}
-     <span>{online?'Siap bermain':'Mode offline'}</span>
-    </span>
-    <button className="icon-button" onClick={()=>setScreen('help')} aria-label="Petunjuk bermain"><CircleHelp size={20}/></button>
-    <button className="icon-button" onClick={openSettings} aria-label="Pengaturan guru"><Settings size={20}/></button>
-   </div>
-  </header>
-  {screen==='home'&&<main className="home-screen">
-   <div className="hero-copy">
-    <div className="event-badge">
-     <span className="event-date">22 OKTOBER</span>
-     <span className="event-title">Hari Santri Nasional 2026</span>
-    </div>
-    <h1>Tebak Gambar <br/><span className="highlight-gold">& Kuis Santri</span></h1>
-    <p className="hero-subtitle">
-     Permainan edukasi interaktif untuk mengenali budaya santri, adab terpuji, dan sejarah Hari Santri Nasional dengan cara yang menyenangkan dan ramah anak.
-    </p>
-    <div className="hero-buttons">
-     <button className="btn btn-gold btn-large" onClick={()=>setScreen('modes')}>
-      Mulai Bermain
-     </button>
-     <button className="btn btn-outline" onClick={()=>setScreen('materials')}>
-      <BookOpen size={18}/> Materi Belajar
-     </button>
-     <button className="btn btn-outline" onClick={openSettings}>
-      <Settings size={18}/> Pengaturan Guru
-     </button>
-    </div>
-    <div className="hero-modes-strip">
-     <span className="strip-label">Pilihan Petualangan:</span>
-     <div className="strip-tags">
-      <span>Tebak Gambar</span>
-      <span>Adab Santri</span>
-      <span>Pasangkan Kartu</span>
-      <span>Temukan Berbeda</span>
-      <span>Urutkan Langkah</span>
-      <span>Sejarah HSN</span>
-     </div>
-    </div>
-   </div>
-   <div className="hero-stage">
-    <div className="arch-portal">
-     <div className="portal-sky">
-      <div className="portal-lantern"><Artwork name="lentera" size={54}/></div>
-      <div className="portal-mosque"><Artwork name="masjid" size={200}/></div>
-     </div>
-     <MascotPair className="portal-mascots"/>
-     <div className="portal-caption">
-      <span>Ahmad & Siti menyambutmu!</span>
-     </div>
-    </div>
-   </div>
-  </main>}
-  {screen==='materials'&&<main className="page-wrap materials-wrap">
-   <div className="page-heading">
-    <div className="page-nav-bar">
-     <button type="button" className="back-link" onClick={goHome}><ArrowLeft size={16}/> Kembali ke Beranda</button>
-    </div>
-    <h1>Materi Belajar Santri</h1>
-    <p className="page-sub">Baca satu materi pendek, lihat gambarnya, lalu coba kuis. Kamu boleh belajar bersama guru atau teman.</p>
-   </div>
-   <div className="materials-grid">
-    <article className="material-card material-card-featured">
-     <div className="material-art"><Artwork name="kitab" size={112} bare={true}/><Artwork name="bookcare" size={88} bare={true}/></div>
-     <div className="material-copy"><span className="material-number">MATERI 1</span><h2>Merawat buku belajar</h2><p>Buku membantu kita belajar. Gunakan dengan hati-hati, lalu simpan kembali di tempatnya.</p><div className="material-tip"><b>Ayo lakukan:</b> Setelah membaca, letakkan buku di rak.</div><button className="btn btn-outline material-button" onClick={()=>{update({modes:['guess']});startGame(['guess']);}}>Coba kuis gambar</button></div>
-    </article>
-    <article className="material-card material-card-compact">
-     <div className="material-art"><Pic name="books-desk" size={112} alt="Buku tersusun rapi di meja belajar" bare={true}/></div>
-     <div className="material-copy"><span className="material-number">MATERI 2</span><h2>Menyiapkan alat belajar</h2><p>Siapkan buku dan pensil di meja sebelum mulai belajar.</p><div className="material-tip"><b>Ayo lakukan:</b> Letakkan perlengkapan belajar dengan rapi.</div><button className="btn btn-outline material-button" onClick={()=>{update({modes:['order']});startGame(['order']);}}>Coba urutan menyiapkan alat belajar</button></div>
-    </article>
-    <article className="material-card material-card-compact">
-     <div className="material-art"><Artwork name="helping" size={112} bare={true}/></div>
-     <div className="material-copy"><span className="material-number">MATERI 3</span><h2>Saling membantu</h2><p>Tanyakan bantuan apa yang dibutuhkan teman, lalu bantu dengan aman.</p><div className="material-tip"><b>Ayo lakukan:</b> Tawarkan bantuan dengan sopan.</div><button className="btn btn-outline material-button" onClick={()=>{update({modes:['good']});startGame(['good']);}}>Coba kuis adab baik</button></div>
-    </article>
-    <article className="material-card material-card-compact">
-     <div className="material-art"><Artwork name="queue" size={112} bare={true}/></div>
-     <div className="material-copy"><span className="material-number">MATERI 4</span><h2>Menunggu giliran</h2><p>Ketika teman berbicara atau bermain, tunggu sampai giliranmu tiba.</p><div className="material-tip"><b>Ayo lakukan:</b> Dengarkan teman sampai selesai.</div><button className="btn btn-outline material-button" onClick={()=>{update({modes:['good']});startGame(['good']);}}>Coba kuis adab baik</button></div>
-    </article>
-    <article className="material-card material-card-compact">
-     <div className="material-art"><Pic name="prayer-space" size={112} alt="Sajadah di tempat salat yang bersih" bare={true}/></div>
-     <div className="material-copy"><span className="material-number">MATERI 5</span><h2>Menyiapkan sajadah</h2><p>Cari tempat yang bersih, lalu gelar sajadah dengan rapi.</p><div className="material-tip"><b>Ayo lakukan:</b> Minta bantuan guru bila perlu.</div><button className="btn btn-outline material-button" onClick={()=>{update({modes:['order']});startGame(['order']);}}>Coba urutan menyiapkan sajadah</button></div>
-    </article>
-   </div>
-   <div className="materials-footer"><MascotPair/><p><b>Belajar pelan-pelan itu boleh.</b><br/>Pilih satu materi dulu, lalu lanjut saat kamu siap.</p></div>
-  </main>}
-  {screen==='modes'&&<main className="page-wrap modes-wrap">
-   <div className="page-heading">
-    <div className="page-nav-bar">
-     <button type="button" className="back-link" onClick={goHome}><ArrowLeft size={16}/> Kembali ke Beranda</button>
-    </div>
-    <h1>Pilih Petualangan Santri</h1>
-    <p className="page-sub">Pilih satu jenis permainan atau gabungkan beberapa mode sekaligus untuk kegiatan belajar santri.</p>
-    <div className="modes-toolbar">
-     <span className="modes-selection-pill">{settings.modes.length} dari {modes.length} Mode Terpilih</span>
-     <div className="modes-quick-buttons">
-      <button 
-        type="button"
-        className="btn-pill" 
-        onClick={()=>update({modes:modes.map(m=>m.id)})} 
-        disabled={settings.modes.length===modes.length}
-      >
-        Pilih Semua
-      </button>
-      <button 
-        type="button"
-        className="btn-pill btn-pill-outline" 
-        onClick={()=>update({modes:[]})} 
-        disabled={settings.modes.length===0}
-      >
-        Hapus Pilihan
-      </button>
-     </div>
-    </div>
-   </div>
-   <div className="mode-grid">
-    {modes.map(m=>{
-     const isSelected = settings.modes.includes(m.id);
-     const qCount = getModeQuestions(m.id).length;
-     return (
-      <button 
-        key={m.id} 
-        type="button"
-        className={`mode-card ${m.color} ${isSelected ? 'selected' : ''}`} 
-        onClick={()=>update({modes:isSelected ? settings.modes.filter(x=>x!==m.id) : [...settings.modes, m.id]})} 
-        aria-pressed={isSelected}
-      >
-       <div className="mode-accent-stripe" aria-hidden="true" />
-       <div className="mode-card-header">
-        <span className="mode-tag"><Sparkles size={13}/> {qCount} Aktivitas</span>
-        <span className={`mode-check ${isSelected ? 'is-selected' : ''}`} aria-hidden="true">
-         {isSelected ? <Check size={16} strokeWidth={2.6}/> : <Plus size={16} strokeWidth={2}/>}
-        </span>
-       </div>
-       <div className="mode-art">
-        <div className="mode-art-medallion">
-         <Artwork name={m.symbol} size={74} bare={true}/>
-        </div>
-       </div>
-       <div className="mode-card-body">
-        <h2>{m.title}</h2>
-        <p>{m.description}</p>
-       </div>
-       <div className="mode-card-footer">
-        <span className={`mode-status ${isSelected ? 'status-active' : 'status-idle'}`}>
-         {isSelected ? '✓ Mode Aktif' : '+ Sentuh untuk Memilih'}
-        </span>
-       </div>
-      </button>
-     );
-    })}
-   </div>
-   <div className="session-controls">
-    <div className="session-control-box count-box">
-     <div className="control-meta">
-      <span className="control-label"><Layers size={15}/> Jumlah Soal</span>
-      <span className="control-sub">Per sesi permainan</span>
-     </div>
-     <div className="stepper-wrap">
-      <button 
-        type="button" 
-        className="stepper-btn" 
-        onClick={()=>update({count:Math.max(3,settings.count-3)})} 
-        disabled={settings.count<=3}
-        aria-label="Kurangi jumlah soal"
-      >
-       <Minus size={16} strokeWidth={2.4}/>
-      </button>
-      <div className="stepper-value-box">
-       <b>{settings.count}</b>
-       <small>Soal</small>
-      </div>
-      <button 
-        type="button" 
-        className="stepper-btn" 
-        onClick={()=>update({count:Math.min(36,settings.count+3)})} 
-        disabled={settings.count>=36}
-        aria-label="Tambah jumlah soal"
-      >
-       <Plus size={16} strokeWidth={2.4}/>
-      </button>
-     </div>
-    </div>
+type Screen = 'home' | 'materials' | 'setup' | 'game' | 'result';
+type TeamState = { index: number; score: number; mistakes: number; selected: string[]; matched: string[]; status: 'ready' | 'retry' | 'revealed' | 'done' | 'finished'; deck: Question[] };
+const imageUrl = (name: string) => `${import.meta.env.BASE_URL}images/${name.includes('2026') ? 'brand' : 'quiz'}/${name}`;
+const shuffled = <T,>(items: T[]) => [...items].sort(() => Math.random() - 0.5);
+const buildTeam = (deck: Question[]): TeamState => ({ index: 0, score: 0, mistakes: 0, selected: [], matched: [], status: 'ready', deck });
+const getChoiceSet = (question: Question) => {
+  const candidates = questions.filter((item, index, all) => item.answer !== question.answer && item.image !== question.image && all.findIndex((candidate) => candidate.answer === item.answer) === index);
+  const offset = Number(question.id.slice(1)) % candidates.length;
+  return [question, candidates[offset], candidates[(offset + 1) % candidates.length]];
+};
 
-    <div className="session-control-box team-box">
-     <label className="team-switch-label">
-      <div className="team-switch-meta">
-       <span className="control-label"><Users size={15}/> Bermain Berkelompok</span>
-       <span className="control-sub">2 Tim bergantian tiap giliran</span>
-      </div>
-      <input 
-        type="checkbox" 
-        className="team-checkbox-hidden" 
-        checked={settings.teams} 
-        onChange={e=>update({teams:e.target.checked})}
-      />
-      <span className={`team-toggle-pill ${settings.teams ? 'active' : ''}`} aria-hidden="true">
-       <span className="team-toggle-text text-active">Aktif</span>
-       <span className="team-toggle-text text-idle">Mati</span>
-       <span className="team-toggle-knob" />
-      </span>
-     </label>
-    </div>
-
-    <div className="session-control-box action-box">
-     <button 
-       type="button" 
-       className="btn btn-gold btn-large btn-start-game" 
-       disabled={!settings.modes.length} 
-       onClick={()=>startGame(settings.modes)}
-     >
-      <Play size={18} fill="currentColor"/>
-      <span>Mulai Sesi Permainan</span>
-     </button>
-     {!settings.modes.length && (
-      <span className="zero-modes-warning">Pilih minimal 1 mode di atas</span>
-     )}
-    </div>
-   </div>
-   {settings.teams&&<div className="team-editor">
-    <div className="team-input-card">
-     <div className="team-badge-row">
-      <span className="team-dot" style={{background:'#2F7FC1'}} />
-      <label htmlFor="team-1-name">Nama Tim 1 (Biru)</label>
-     </div>
-     <input 
-       id="team-1-name" 
-       value={settings.teamNames[0]} 
-       placeholder="Nama Tim 1" 
-       onChange={e=>update({teamNames:[e.target.value,settings.teamNames[1]]})}
-     />
-    </div>
-    <div className="team-input-card">
-     <div className="team-badge-row">
-      <span className="team-dot" style={{background:'#1F8A5B'}} />
-      <label htmlFor="team-2-name">Nama Tim 2 (Hijau)</label>
-     </div>
-     <input 
-       id="team-2-name" 
-       value={settings.teamNames[1]} 
-       placeholder="Nama Tim 2" 
-       onChange={e=>update({teamNames:[settings.teamNames[0],e.target.value]})}
-     />
-    </div>
-   </div>}
-  </main>}   {screen==='game'&&current&&<main className="game-wrap"><div className="game-top"><button className="back-link" onClick={()=>setScreen('pause')}><Pause size={17}/> Jeda</button><div className="progress-meta"><span>RONDE {round}</span><b>{index+1} <small>/ {session.length}</small></b></div><div className="score-chip"><Trophy size={16}/>{settings.scoreEnabled?score+' poin':'Mode tanpa skor'}</div></div><div className="progress-track"><span style={{width:`${((index+1)/session.length)*100}%`}}/></div><section className="question-panel"><div className="question-mascot"><div className="mascot-pedestal"><Mascot girl={index%2===1} pose={feedback==='correct'?'celebrate':hint?'think':'wave'}/></div><div className="speech-bubble">{feedback==='correct'?'Hebat, kamu berhasil!':feedback==='reveal'?'Kamu sudah berusaha dengan baik.':hint?'Ini petunjuk untukmu!':'Kita coba bersama, ya!'}</div></div><div className="question-main"><div className="question-kicker"><span>{mode?.title}</span><span className="difficulty">{'★'.repeat(current.difficulty)}{'☆'.repeat(3-current.difficulty)}</span></div><h1>{current.prompt}</h1>{current.mode==='order'?<><p className="instruction">Pilih langkah sesuai urutan, lalu gunakan panah untuk mengatur posisi.</p><div className="order-pool">{questionList.filter(s=>!order.includes(s)).map((s,i)=><button className="option-card order-option" key={s} onClick={()=>chooseOrder(s)}><span className="option-number">{i+1}</span><StepIllustration step={s} size={42}/><span>{s}</span><Plus size={17}/></button>)}</div><div className="ordered-list"><h3>Urutan pilihanmu</h3>{order.map((s,i)=><div className="ordered-item" key={`${s}-${i}`}><b>{i+1}</b><StepIllustration step={s} size={42}/><span>{s}</span><button className="small-icon" aria-label={`Pindahkan ${s} ke atas`} onClick={()=>moveOrder(i,-1)} disabled={i===0}><ArrowLeft size={15}/></button><button className="small-icon" aria-label={`Pindahkan ${s} ke bawah`} onClick={()=>moveOrder(i,1)} disabled={i===order.length-1}><ArrowLeft style={{transform:'rotate(180deg)'}} size={15}/></button><button className="small-icon remove" aria-label={`Hapus ${s}`} onClick={()=>chooseOrder(s)}><X size={15}/></button></div>)}</div></>:<>{current.mode!=='odd'&&<div className="question-illustration"><div className="illustration-stage"><Artwork name={current.image} size={140} bare={true}/></div>{current.mode==='match'&&<span className="illustration-caption">Pilih dua gambar yang sama</span>}</div>}<p className="instruction">{current.mode==='match'?'Sentuh dua kartu yang memiliki nama sama.':current.mode==='odd'?'Pilih satu gambar yang berbeda.':'Pilih jawaban yang menurutmu tepat.'}</p><div className={`answer-grid ${current.mode==='match'?'match-grid':''}`}>{(current.mode==='match'?current.options:questionList).map((option,i)=><button key={`${option}-${i}`} className={`option-card ${chosen.includes(option)?'chosen':''} ${feedback==='correct'&&option===current.correct?'correct-option':''}`} onClick={()=>answer(option)} disabled={!!feedback} aria-pressed={chosen.includes(option)}><span className="option-number">{String.fromCharCode(65+i)}</span>{(current.mode==='match'||current.mode==='odd')&&picKey(option)&&<Pic name={option} size={72} bare={true}/>}<span className="option-label">{option}</span>{chosen.includes(option)&&<Check className="option-check-icon" size={17} strokeWidth={2.5}/>}</button>)}</div></>}
-  {hint&&<div className="hint-box"><CircleHelp size={18}/><span>{current.hint}</span></div>}{feedback&&<div className={`feedback ${feedback==='correct'?'success':'gentle'}`} role="status"><span className="feedback-symbol">{feedback==='correct'?'✓':'♡'}</span><span><b>{feedback==='correct'?'Hebat, kamu berhasil!':feedback==='reveal'?`Jawabannya: ${current.correct}`:'Ayo, kita coba lagi.'}</b><small>{feedback==='correct'?'Terus semangat, ya!':feedback==='reveal'?'Tidak apa-apa, setiap usaha itu berarti.':'Perhatikan gambar dan coba sekali lagi.'}</small></span></div>}
-  <div className="question-actions"><button className="btn btn-soft" onClick={hintAction}><CircleHelp size={18}/> Bantuan</button><button className="btn btn-soft" onClick={()=>speak(current.prompt)} disabled={!ttsAvailable||settings.quiet}><Volume2 size={18}/> Dengarkan</button>{current.mode==='order'&&!feedback&&<button className="btn btn-blue" onClick={orderCheck} disabled={order.length!==3}>Periksa Urutan <Check size={17}/></button>}{feedback==='try'&&<button className="btn btn-blue" onClick={retry}>Coba Lagi <RotateCcw size={17}/></button>}{feedback==='correct'||feedback==='reveal'?<button className="btn btn-gold" onClick={next}>{index===session.length-1?'Lihat Hasil':'Lanjut'}</button>:null}</div></div></section><div className="game-footnote">Tidak harus terburu-buru. Belajar dengan nyaman dan menyenangkan!</div></main>}
-  {screen==='pause'&&<main className="center-screen"><div className="pause-card"><Mascot pose="rest"/><h1>Kita istirahat sebentar, ya.</h1><p>Ambil waktu yang kamu perlukan. Permainan akan menunggu di sini.</p><div className="center-actions"><button className="btn btn-gold btn-large" onClick={()=>setScreen('game')}><Play size={18}/> Lanjut Bermain</button><button className="btn btn-outline-dark" onClick={goHome}><Home size={18}/> Kembali ke Beranda</button><button className="btn btn-soft" onClick={()=>update({quiet:!settings.quiet,sound:settings.quiet,voice:settings.quiet,music:false,minimalMotion:!settings.quiet})}>{settings.quiet?<Volume2 size={17}/>:<VolumeX size={17}/>} {settings.quiet?'Aktifkan Suara':'Mode Tenang'}</button></div></div></main>}
-  {screen==='result'&&<main className="center-screen"><div className="result-card"><MascotPair className="result-mascots"/><h1>Selamat! Kamu telah menyelesaikan permainan.</h1><p>Terima kasih sudah belajar dan bermain bersama.</p><div className="result-stats"><div><b>{completed}</b><span>Jawaban Benar</span></div><div><b>{session.length}</b><span>Aktivitas Dicoba</span></div>{settings.scoreEnabled&&<div><b>{score}</b><span>Total Poin</span></div>}</div>{settings.teams&&<div className="team-result">Skor kelompok: <b>{settings.teamNames[0]}</b> & <b>{settings.teamNames[1]}</b> bergantian bermain. Skor individu tidak dibandingkan.</div>}<div className="center-actions"><button className="btn btn-gold btn-large" onClick={()=>startGame(settings.modes)}><RotateCcw size={18}/> Main Lagi</button><button className="btn btn-outline-dark" onClick={()=>{setNotice(`Ringkasan sesi: ${completed} jawaban benar dari ${session.length} aktivitas. ${settings.scoreEnabled?`Skor ${score} poin.`:''}`);goHome();}}><Home size={18}/> Kembali ke Beranda</button><button className="btn btn-soft" onClick={()=>{const summary=`Ringkasan Kuis Santri\nTanggal: ${new Date().toLocaleDateString('id-ID')}\nAktivitas dicoba: ${session.length}\nJawaban benar: ${completed}\nSkor: ${score}\nCatatan: hasil ini bukan penilaian kemampuan anak.`;const blob=new Blob([summary],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='ringkasan-sesi-santri.txt';a.click();URL.revokeObjectURL(url);}}><Download size={17}/> Unduh Ringkasan Guru</button></div></div></main>}
-  {screen==='help'&&<div className="overlay" role="dialog" aria-modal="true" aria-labelledby="help-title"><div className="modal-card help-modal"><button className="modal-close" onClick={()=>setScreen('home')} aria-label="Tutup petunjuk"><X/></button><h1 id="help-title">Cara Bermain</h1><div className="help-list"><div><span>1</span><p><b>Pilih Permainan</b><small>Pilih satu atau beberapa mode yang kamu suka.</small></p></div><div><span>2</span><p><b>Amati Gambar</b><small>Baca instruksi, dengarkan suara, atau minta bantuan guru.</small></p></div><div><span>3</span><p><b>Pilih Jawaban</b><small>Sentuh kartu pilihan. Tidak ada batas waktu dalam menjawab.</small></p></div><div><span>4</span><p><b>Istirahat Jika Perlu</b><small>Tekan tombol Jeda kapan saja saat butuh rehat.</small></p></div></div><button className="btn btn-gold btn-large full" onClick={()=>setScreen('modes')}>Mengerti, Ayo Bermain</button></div></div>}
-  {screen==='settings'&&<div className="overlay" role="dialog" aria-modal="true" aria-labelledby="settings-title"><div className={`modal-card settings-modal ${pin!==settings.pin?'pin-gate-modal':''}`}><div className="modal-heading"><div><h1 id="settings-title">{pin===settings.pin?'Pengaturan Guru':'Akses Khusus'}</h1></div><button className="modal-close" onClick={()=>setScreen('home')} aria-label="Tutup pengaturan"><X/></button></div>{pin!==settings.pin&&<div className="pin-gate"><div className="pin-icon-wrap"><div className="pin-icon-medallion"><Lock size={26} strokeWidth={2.4}/></div></div><h2>Masukkan PIN Guru</h2><p className="pin-desc">Area ini dikhususkan untuk guru dan pendamping belajar santri.</p><div className="pin-default-chip"><Sparkles size={13}/> PIN awal perangkat: <b>1234</b></div><form className="pin-form" onSubmit={e=>{e.preventDefault();enterSettings();}}><input autoFocus type="password" inputMode="numeric" maxLength={12} value={pin} onChange={e=>setPin(e.target.value)} placeholder="••••" aria-label="PIN guru" className="pin-input-box"/>{pinError&&<div className="pin-error-alert" role="alert">{pinError}</div>}<div className="pin-actions"><button className="btn btn-gold btn-large pin-submit-btn" type="submit">Buka Pengaturan</button><button type="button" className="btn btn-soft pin-cancel-btn" onClick={()=>setScreen('home')}>Kembali ke Permainan</button></div></form></div>}{pin===settings.pin&&<><div className="settings-tabs">{[['game','Permainan'],['teams','Tim & Skor'],['audio','Audio'],['access','Aksesibilitas'],['data','Data & Sistem']].map(([id,label])=><button key={id} className={settingsTab===id?'active':''} onClick={()=>setSettingsTab(id)}>{label}</button>)}</div><div className="settings-content">{settingsTab==='game'&&<div className="setting-section"><h2>Atur Sesi Permainan</h2><p className="muted">Pilih jenis aktivitas yang ingin disertakan dalam sesi belajar santri.</p><div className="settings-mode-list">{modes.map(m=><label key={m.id} className="setting-check"><input type="checkbox" checked={settings.modes.includes(m.id)} onChange={e=>update({modes:e.target.checked?[...settings.modes,m.id]:settings.modes.filter(x=>x!==m.id)})}/><span>{m.title}</span></label>)}</div><div className="setting-grid"><label><span>Jumlah Soal</span><select value={settings.count} onChange={e=>update({count:+e.target.value})}>{[6,9,12,18,24,30,36].map(n=><option key={n}>{n} Soal</option>)}</select></label><label><span>Tingkat Kesulitan</span><select value={settings.difficulty} onChange={e=>update({difficulty:+e.target.value})}><option value="1">Mudah</option><option value="2">Sedang</option><option value="3">Semua Tingkat</option></select></label><label><span>Percobaan Menjawab</span><select value={settings.attempts} onChange={e=>update({attempts:+e.target.value})}>{[1,2,3,4,5].map(n=><option key={n} value={n}>{n} Kali</option>)}</select></label><label><span>Durasi Jeda Istirahat</span><select value={settings.breakSeconds} onChange={e=>update({breakSeconds:+e.target.value})}>{[0,10,15,30,60].map(n=><option key={n} value={n}>{n===0?'Bebas':n+' Detik'}</option>)}</select></label></div><Toggle label="Acak urutan soal" checked={settings.shuffle} onChange={v=>update({shuffle:v})}/><Toggle label="Lanjut otomatis setelah jawaban benar" checked={settings.autoNext} onChange={v=>update({autoNext:v})}/><p className="muted">Tidak ada batas waktu. Anak dapat menjawab dengan tenang dan guru bisa memberi jeda kapan saja.</p></div>}
-  {settingsTab==='teams'&&<div className="setting-section"><h2>Tim dan Penilaian</h2><Toggle label="Mode bermain kelompok (2 tim)" checked={settings.teams} onChange={v=>update({teams:v})}/><Toggle label="Tampilkan perolehan skor" checked={settings.scoreEnabled} onChange={v=>update({scoreEnabled:v})}/><div className="setting-grid"><label><span>Nama Tim 1</span><input value={settings.teamNames[0]} onChange={e=>update({teamNames:[e.target.value,settings.teamNames[1]]})}/></label><label><span>Nama Tim 2</span><input value={settings.teamNames[1]} onChange={e=>update({teamNames:[settings.teamNames[0],e.target.value]})}/></label><label><span>Poin per Jawaban Benar</span><input type="number" min="0" max="100" value={settings.points} onChange={e=>update({points:Math.max(0,Math.min(100,+e.target.value))})}/></label><label><span>Skor Awal</span><input type="number" min="0" max="10000" value={0} readOnly/></label></div><p className="muted">Skor hanya untuk suasana bermain, bukan ukuran kemampuan anak. Pergantian giliran berjalan bergantian pada setiap soal.</p></div>}
- {settingsTab==='audio'&&<div className="setting-section"><h2>Suara dan narasi</h2><Toggle label="Efek suara" checked={settings.sound&&!settings.quiet} onChange={v=>update({sound:v,quiet:!v?true:false})}/><Toggle label="Instruksi dibacakan (text-to-speech)" checked={settings.voice&&!settings.quiet} onChange={v=>update({voice:v,quiet:!v?settings.quiet:false})}/><Toggle label="Musik latar" checked={settings.music&&!settings.quiet} onChange={v=>update({music:v,quiet:!v?true:false})}/><label className="range-label">Volume <b>{settings.volume}%</b><input type="range" min="0" max="100" step="10" value={settings.volume} onChange={e=>update({volume:+e.target.value})}/></label><button className="btn btn-soft" onClick={()=>speak('Halo, selamat datang di permainan Kuis Santri.')} disabled={!ttsAvailable}><Volume2 size={17}/> Uji suara {ttsAvailable?'bahasa Indonesia':'(tidak didukung browser)'}</button><p className="muted">Audio tidak otomatis diputar saat halaman dibuka. Musik latar tersedia sebagai pengaturan, tetapi belum ada berkas musik bawaan.</p></div>}
- {settingsTab==='access'&&<div className="setting-section"><h2>Kebutuhan belajar</h2><Toggle label="Mode tenang (matikan suara dan animasi)" checked={settings.quiet} onChange={v=>update({quiet:v,sound:v?false:settings.sound,voice:v?false:settings.voice,music:false,minimalMotion:v?true:settings.minimalMotion})}/><Toggle label="Animasi minimal" checked={settings.minimalMotion} onChange={v=>update({minimalMotion:v})}/><Toggle label="Kontras tinggi" checked={settings.highContrast} onChange={v=>update({highContrast:v})}/><Toggle label="Bantuan visual" checked={settings.visualHints} onChange={v=>update({visualHints:v})}/><label className="range-label">Ukuran teks <b>{settings.textScale}%</b><input type="range" min="90" max="140" step="10" value={settings.textScale} onChange={e=>update({textScale:+e.target.value})}/></label><p className="muted">Guru dapat membacakan instruksi, membantu memilih kartu, atau memberi jeda. Semua soal dapat dimainkan tanpa berbicara.</p></div>}
- {settingsTab==='data'&&<div className="setting-section"><h2>Data dan sistem</h2><div className="system-status"><span className={online?'status-good':'status-warn'}>{online?<Wifi size={19}/>:<WifiOff size={19}/>}</span><div><b>{online?'Koneksi tersedia':'Sedang offline'}</b><small>{'Status aset lokal: ilustrasi dan data soal dibundel bersama aplikasi.'}</small></div></div><div className="system-status"><span className="status-good"><Check size={19}/></span><div><b>{'Text-to-speech '+(ttsAvailable?'tersedia':'tidak tersedia')}</b><small>Fitur suara bergantung pada dukungan browser dan suara bahasa Indonesia di perangkat.</small></div></div><div className="data-actions"><button className="btn btn-soft" onClick={exportSettings}><Download size={17}/> Ekspor pengaturan JSON</button><label className="btn btn-soft file-button"><Upload size={17}/> Impor pengaturan JSON<input type="file" accept="application/json,.json" onChange={e=>importSettings(e.target.files?.[0])}/></label><button className="btn btn-danger-soft" onClick={()=>{if(window.confirm('Kembalikan semua pengaturan ke setelan awal?')){setSettings(defaults);setNotice('Pengaturan dikembalikan ke setelan awal.');}}}><RotateCcw size={17}/> Reset pengaturan</button></div><p className="muted">Versi 1.0.0 · Tidak mengumpulkan data pribadi · Tidak mengirim hasil permainan ke server.</p></div>}
- </div><div className="settings-footer"><span>Perubahan disimpan di perangkat ini.</span><button className="btn btn-gold" onClick={()=>setScreen('home')}>Selesai</button></div></>}</div></div>}
-  {notice&&<div className="toast" role="status">{notice}<button onClick={()=>setNotice('')} aria-label="Tutup pemberitahuan"><X size={16}/></button></div>}
- </div>;
+function Picture({ question, className = '' }: { question: Question; className?: string }) {
+  return <img className={`picture ${className}`} src={imageUrl(question.image)} alt={question.alt} loading="lazy" />;
 }
-function Toggle({label,checked,onChange}:{label:string;checked:boolean;onChange:(v:boolean)=>void}){return <label className="toggle-row"><span>{label}</span><input type="checkbox" checked={checked} onChange={e=>onChange(e.target.checked)}/><span className="toggle-ui" aria-hidden="true"/></label>}
+
+function App() {
+  const [screen, setScreen] = useState<Screen>('home');
+  const [mode, setMode] = useState<ModeId>('guess');
+  const [selectedTopics, setSelectedTopics] = useState<TopicId[]>(topics.map((item) => item.id));
+  const [count, setCount] = useState(10);
+  const [teams, setTeams] = useState(false);
+  const [sound, setSound] = useState(true);
+  const [audioNotice, setAudioNotice] = useState('');
+  const [teamStates, setTeamStates] = useState<TeamState[]>([]);
+
+  const available = useMemo(() => (mode === 'match' ? matchingItems : questions).filter((item) => selectedTopics.includes(item.topic)), [mode, selectedTopics]);
+  const actualCount = Math.min(count, available.length || 1, 20);
+
+  const say = (text: string) => {
+    if (!sound) return;
+    if (!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined') {
+      setAudioNotice('Suara belum tersedia pada perangkat ini. Minta guru membacakan petunjuk.');
+      return;
+    }
+    try {
+      setAudioNotice('');
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'id-ID';
+      utterance.rate = 0.82;
+      utterance.pitch = 1;
+      window.speechSynthesis.speak(utterance);
+    } catch {
+      setAudioNotice('Suara belum tersedia pada perangkat ini. Minta guru membacakan petunjuk.');
+    }
+  };
+
+  const startGame = () => {
+    if (available.length === 0) return;
+    const decks = Array.from({ length: teams ? 2 : 1 }, () => shuffled(available).slice(0, actualCount));
+    setTeamStates(decks.map(buildTeam));
+    setScreen('game');
+  };
+
+  const nextQuestion = (teamIndex: number) => {
+    setTeamStates((old) => old.map((team, index) => index !== teamIndex ? team : team.index + 1 >= team.deck.length
+      ? { ...team, status: 'finished', selected: [], matched: [] }
+      : { ...team, index: team.index + 1, mistakes: 0, selected: [], matched: [], status: 'ready' }));
+  };
+
+  const chooseAnswer = (teamIndex: number, value: string) => {
+    const current = teamStates[teamIndex];
+    if (!current || current.status === 'done' || current.status === 'revealed') return;
+    const question = current.deck[current.index];
+    if (value === question.answer) {
+      setTeamStates((old) => old.map((team, index) => index !== teamIndex ? team : { ...team, score: team.score + (team.mistakes === 0 ? 1 : 0), status: 'done' }));
+      say(`Benar. Ini gambar ${question.answer}.`);
+    } else {
+      const mistakes = current.mistakes + 1;
+      setTeamStates((old) => old.map((team, index) => index !== teamIndex ? team : { ...team, mistakes, status: mistakes >= 2 ? 'revealed' : 'retry' }));
+      say(mistakes >= 2 ? `Jawabannya ${question.answer}. Kita lanjut.` : 'Belum tepat. Coba sekali lagi.');
+    }
+  };
+
+  const tapMatch = (teamIndex: number, itemId: string) => {
+    const state = teamStates[teamIndex];
+    if (!state || state.status === 'done' || state.status === 'revealed' || state.matched.includes(itemId) || state.selected.includes(itemId)) return;
+    const selected = [...state.selected, itemId];
+    if (selected.length < 2) {
+      setTeamStates((old) => old.map((team, index) => index === teamIndex ? { ...team, selected } : team));
+      return;
+    }
+    const [firstId, secondId] = selected;
+    const activeQuestion = state.deck[state.index];
+    const board = [activeQuestion, ...matchingItems.filter((item) => item.id !== activeQuestion.id).slice(0, 1)];
+    const first = board.find((item) => item.id === firstId.split(':')[0]);
+    const second = board.find((item) => item.id === secondId.split(':')[0]);
+    const correct = Boolean(first && second && first.id === second.id);
+    if (correct) {
+      const matched = [...state.matched, firstId, secondId];
+      const targetPairs = 2;
+      if (matched.length >= targetPairs * 2) {
+        setTeamStates((old) => old.map((team, index) => index !== teamIndex ? team : { ...team, matched, selected: [], score: team.score + (team.mistakes === 0 ? 1 : 0), status: 'done' }));
+        say('Hebat, semua pasangan cocok.');
+      } else setTeamStates((old) => old.map((team, index) => index === teamIndex ? { ...team, matched, selected: [] } : team));
+    } else {
+      const mistakes = state.mistakes + 1;
+      setTeamStates((old) => old.map((team, index) => index !== teamIndex ? team : { ...team, selected: [], mistakes, status: mistakes >= 2 ? 'revealed' : 'retry' }));
+      say(mistakes >= 2 ? 'Pasangan yang sama terlihat pada kartu bergambar sama. Kita lanjut.' : 'Belum cocok. Pilih pasangan sekali lagi.');
+    }
+  };
+
+  const allDone = teamStates.length > 0 && teamStates.every((team) => team.status === 'finished');
+  const finishOrContinue = (index: number) => {
+    const isLastQuestion = teamStates[index].index + 1 >= teamStates[index].deck.length;
+    const otherTeamsFinished = teamStates.every((team, teamIndex) => teamIndex === index || team.status === 'finished');
+    if (isLastQuestion && otherTeamsFinished) setScreen('result');
+    else if (allDone) setScreen('result');
+    else nextQuestion(index);
+  };
+  const goHome = () => { window.speechSynthesis?.cancel(); setAudioNotice(''); setScreen('home'); };
+
+  return <div className="app-shell">
+    <header className="topbar">
+      <button className="brand" onClick={goHome} aria-label="Kembali ke beranda"><img src={imageUrl('hari-santri-2026.png')} alt="Logo Hari Santri 2026" /><span>Kuis Santri</span></button>
+      <div className="identity-logos"><img src={imageUrl('plp.png')} alt="Logo PLP UNIPAR Jember dan SLB C TPA Jember" /></div>
+      <button className="sound-toggle" onClick={() => setSound((value) => { const next = !value; if (!next) window.speechSynthesis?.cancel(); return next; })} aria-pressed={sound}>{sound ? 'Suara aktif' : 'Suara mati'}</button>
+    </header>
+
+    {screen === 'home' && <main className="home page-width">
+      <section className="welcome">
+        <div className="welcome-copy"><p className="eyebrow">Belajar Hari Santri</p><h1>Kenali kehidupan santri, satu gambar setiap kali.</h1><p className="intro">Permainan sederhana dengan gambar benda yang jelas, tombol besar, dan petunjuk suara yang lembut. Main bersama guru atau dua tim di satu layar sentuh.</p>
+          <div className="actions"><button className="button primary" onClick={() => setScreen('setup')}>Mulai bermain</button><button className="button secondary" onClick={() => setScreen('materials')}>Lihat materi</button></div>
+          <p className="short-note">Tidak ada batas waktu. Boleh mendengar, membaca, dan mencoba lagi.</p></div>
+      <figure className="hero-photo"><img src={imageUrl('quran.png')} alt="Al-Qur’an diletakkan di atas rehal untuk kegiatan belajar" /><figcaption>Belajar dan beribadah adalah bagian dari keseharian santri.</figcaption></figure>
+      </section>
+      <section className="mode-preview" aria-label="Dua pilihan permainan"><h2>Dua cara bermain</h2>{modes.map((item, index) => <article key={item.id}><span className="mode-number">0{index + 1}</span><div><h3>{item.title}</h3><p>{item.description}</p></div></article>)}</section>
+    </main>}
+
+    {screen === 'materials' && <main className="page-width subpage"><button className="text-button" onClick={goHome}>Kembali ke beranda</button><h1>Materi singkat tentang santri</h1><p className="intro">Baca bersama. Satu kalimat pendek untuk setiap gambar.</p><div className="materials-list">
+      {[
+        ['peci.png','Perlengkapan santri','Peci, sarung, sajadah, dan tasbih dapat digunakan dalam kegiatan ibadah.'],
+        ['masjid.png','Tempat ibadah','Masjid adalah tempat umat Islam beribadah dan salat berjemaah.'],
+        ['quran.png','Al-Qur’an dan belajar','Santri belajar membaca Al-Qur’an. Rehal membantu menyangga kitab saat dibaca.'],
+        ['books-desk.png','Kegiatan santri','Santri belajar bersama guru dan teman. Belajar dapat dilakukan perlahan-lahan.'],
+        ['hari-santri-2026.png','Hari Santri','Hari Santri diperingati setiap tanggal 22 Oktober. Kita menghargai semangat belajar dan kebaikan.'],
+      ].map(([image, title, copy]) => <article className="material" key={title}><img src={imageUrl(image)} alt={title} loading="lazy" /><div><h2>{title}</h2><p>{copy}</p><button className="read-button" onClick={() => say(copy)}>Dengarkan materi</button></div></article>)}
+    </div></main>}
+
+    {screen === 'setup' && <main className="page-width subpage setup-page"><button className="text-button" onClick={goHome}>Kembali ke beranda</button><h1>Siapkan permainan</h1><p className="intro">Pilih cara bermain, materi, dan jumlah soal. Pengaturan bisa dibacakan.</p><button className="read-button" onClick={() => say('Pilih satu cara bermain, materi, jumlah soal, lalu pilih bermain sendiri atau dua tim.')}>Dengarkan petunjuk</button>
+      <section className="setup-section"><h2>1. Cara bermain</h2><div className="choice-row">{modes.map((item) => <button key={item.id} className={`choice ${mode === item.id ? 'chosen' : ''}`} aria-pressed={mode === item.id} onClick={() => setMode(item.id)}><b>{item.title}</b><span>{item.description}</span></button>)}</div></section>
+      <section className="setup-section"><h2>2. Pilih materi</h2><div className="topic-list">{topics.map((topic) => <label key={topic.id} className="topic-option"><input type="checkbox" checked={selectedTopics.includes(topic.id)} onChange={(event) => setSelectedTopics((old) => event.target.checked ? [...old, topic.id] : old.filter((id) => id !== topic.id))} /><span>{topic.title}</span></label>)}</div></section>
+      <section className="setup-section setup-controls"><label>Jumlah soal <select value={count} onChange={(event) => setCount(Number(event.target.value))}>{Array.from({ length: 20 }, (_, index) => index + 1).map((value) => <option key={value} value={value}>{value} soal</option>)}</select></label><label className="team-option"><input type="checkbox" checked={teams} onChange={(event) => setTeams(event.target.checked)} /><span>Bermain dengan 2 tim</span></label><p className="availability">{available.length === 0 ? 'Pilih setidaknya satu materi untuk mulai bermain.' : `Tersedia ${available.length} soal untuk pilihan materi ini. ${count > available.length ? `Permainan akan memakai ${available.length} soal.` : ''}`}</p></section>
+      <button className="button primary start-button" disabled={!selectedTopics.length || !available.length} onClick={startGame}>Mulai {teams ? 'dua tim' : 'bermain'}</button>
+    </main>}
+
+    {screen === 'game' && <main className="page-width game-page"><div className="game-heading"><button className="text-button" onClick={() => setScreen('setup')}>Pengaturan permainan</button><h1>{mode === 'guess' ? 'Pilih gambar yang benar' : 'Pasangkan dua gambar'}</h1><p>Setiap tim menjawab sendiri. Tidak ada batas waktu.</p></div>
+      <div className={`team-grid ${teams ? 'two-teams' : ''}`}>{teamStates.map((state, teamIndex) => { const question = state.deck[state.index]; const teamName = teams ? `Tim ${teamIndex + 1}` : 'Giliranmu'; return <section className={`team-panel team-${teamIndex + 1}`} key={teamIndex} aria-label={teamName}>
+        <div className="team-heading"><h2>{teamName}<small>Soal {state.index + 1} dari {state.deck.length}</small></h2><strong>{state.score} poin</strong></div>
+        {state.status === 'finished' ? <div className="answer-state" role="status"><p className="status-message">Selesai. Skor {state.score} poin.</p>{allDone && <button className="button primary" onClick={() => setScreen('result')}>Lihat hasil</button>}</div> : state.status === 'done' || state.status === 'revealed' ? <div className="answer-state" role="status"><p className="status-message">{state.status === 'done' ? (state.mistakes === 0 ? 'Benar! Dapat 1 poin.' : 'Jawaban benar. Kamu sudah mencoba, soal berikutnya!') : `Jawabannya: ${question.answer}. Kita lanjut.`}</p><button className="button primary" onClick={() => finishOrContinue(teamIndex)}>{allDone ? 'Lihat hasil' : 'Soal berikutnya'}</button></div> : <>
+          <div className="prompt-row"><p>{mode === 'guess' ? question.prompt : 'Ketuk gambar pertama, lalu ketuk pasangannya.'}</p><button className="listen-button" onClick={() => say(mode === 'guess' ? question.prompt : 'Ketuk gambar pertama, lalu ketuk gambar yang sama.')}>Dengarkan</button></div>
+          {mode === 'guess' ? <div className="answer-grid">{getChoiceSet(question).map((item, optionIndex) => <button key={`${item.id}-${optionIndex}`} className="answer-card" onClick={() => chooseAnswer(teamIndex, item.answer)} aria-label={`Pilih gambar ${item.alt}`}><Picture question={item} /><span>{item.answer}</span></button>)}</div> : <div className="match-grid">{[question, ...matchingItems.filter((item) => item.id !== question.id).slice(0, 1)].flatMap((item) => [0, 1].map((copy) => <button key={`${item.id}-${copy}`} className={`match-card ${state.selected.includes(`${item.id}:${copy}`) ? 'is-selected' : ''} ${state.matched.includes(`${item.id}:${copy}`) ? 'is-matched' : ''}`} onClick={() => tapMatch(teamIndex, `${item.id}:${copy}`)} aria-label={`Kartu gambar ${item.alt}`}><Picture question={item} /><span>{item.answer}</span></button>))}</div>}
+          {state.status === 'retry' && <p className="try-message" role="status">Belum tepat. Kamu boleh mencoba sekali lagi.</p>}
+          <p className="score-rule">Jawaban benar pada percobaan pertama mendapat 1 poin. Jawaban salah tidak mengurangi poin.</p>
+        </>}
+      </section>; })}</div>
+    </main>}
+
+    {screen === 'result' && <main className="page-width result-page"><p className="eyebrow">Permainan selesai</p><h1>Terima kasih sudah bermain bersama.</h1><div className={`result-scores ${teams ? 'two-teams' : ''}`}>{teamStates.map((team, index) => <article key={index}><h2>{teams ? `Tim ${index + 1}` : 'Skor kamu'}</h2><strong>{team.score}</strong><span>poin dari {team.deck.length} soal</span></article>)}</div>{teams && teamStates[0].score !== teamStates[1].score && <p className="winner">{teamStates[0].score > teamStates[1].score ? 'Tim 1' : 'Tim 2'} mendapat poin lebih banyak.</p>}{teams && teamStates[0].score === teamStates[1].score && <p className="winner">Skor kedua tim sama.</p>}<div className="actions"><button className="button primary" onClick={() => setScreen('setup')}>Main lagi</button><button className="button secondary" onClick={goHome}>Kembali ke beranda</button></div></main>}
+
+    {audioNotice && <p className="audio-notice" role="status">{audioNotice}</p>}
+    <footer className="footer"><span>Belajar pelan-pelan itu boleh.</span><span>Untuk layar sentuh dan belajar bersama.</span></footer>
+  </div>;
+}
+
 export default App;

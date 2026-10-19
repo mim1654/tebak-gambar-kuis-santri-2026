@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, Check, CircleHelp, Home, Pause, Play, RotateCcw, Settings, Volume2, VolumeX, X, Download, Upload, Trophy, Wifi, WifiOff, Plus, Minus, Sparkles, Users, Layers, Lock } from 'lucide-react';
+import { ArrowLeft, BookOpen, Check, CircleHelp, Home, Pause, Play, RotateCcw, Settings, Volume2, VolumeX, X, Download, Upload, Trophy, Wifi, WifiOff, Plus, Minus, Sparkles, Users, Layers, Lock } from 'lucide-react';
 import { Artwork, Mascot, MascotPair } from './components/Artwork';
 import { Pic, picKey, StepIllustration } from './components/Pic';
 import { playSfx, startMusic, stopMusic, unlockAudio } from './lib/audio';
@@ -10,7 +10,7 @@ const defaults:SettingsType = {modes:['guess','good','match','odd','order','hist
 const readSettings = ():SettingsType => { try { const v=localStorage.getItem('santri-settings'); if(v){const p=JSON.parse(v); return {...defaults,...p,modes:Array.isArray(p.modes)?p.modes:defaults.modes};} } catch {} return defaults; };
 const shuffle = <T,>(arr:T[]) => [...arr].sort(()=>Math.random()-.5);
 function App(){
- const [settings,setSettings]=useState<SettingsType>(readSettings); const [screen,setScreen]=useState<'home'|'modes'|'game'|'pause'|'result'|'settings'|'help'>('home');
+ const [settings,setSettings]=useState<SettingsType>(readSettings); const [screen,setScreen]=useState<'home'|'modes'|'materials'|'game'|'pause'|'result'|'settings'|'help'>('home');
  const [session,setSession]=useState<Question[]>([]); const [index,setIndex]=useState(0); const [score,setScore]=useState(0); const [attempt,setAttempt]=useState(0); const [chosen,setChosen]=useState<string[]>([]); const [order,setOrder]=useState<string[]>([]); const [feedback,setFeedback]=useState(''); const [hint,setHint]=useState(false); const [completed,setCompleted]=useState(0); const [,setTeam]=useState(0); const [round,setRound]=useState(1); const [pin,setPin]=useState(''); const [pinError,setPinError]=useState(''); const [settingsTab,setSettingsTab]=useState('game'); const [notice,setNotice]=useState(''); const [online,setOnline]=useState(navigator.onLine); const [ttsAvailable,setTtsAvailable]=useState(false);
  useEffect(()=>{try{localStorage.setItem('santri-settings',JSON.stringify(settings));}catch{setNotice('Penyimpanan lokal tidak tersedia. Pengaturan berlaku selama halaman ini terbuka.');}},[settings]);
  useEffect(()=>{const on=()=>setOnline(true),off=()=>setOnline(false);window.addEventListener('online',on);window.addEventListener('offline',off);setTtsAvailable('speechSynthesis'in window);return()=>{window.removeEventListener('online',on);window.removeEventListener('offline',off);};},[]);
@@ -68,6 +68,9 @@ function App(){
      <button className="btn btn-gold btn-large" onClick={()=>setScreen('modes')}>
       Mulai Bermain
      </button>
+     <button className="btn btn-outline" onClick={()=>setScreen('materials')}>
+      <BookOpen size={18}/> Materi Belajar
+     </button>
      <button className="btn btn-outline" onClick={openSettings}>
       <Settings size={18}/> Pengaturan Guru
      </button>
@@ -96,6 +99,34 @@ function App(){
      </div>
     </div>
    </div>
+  </main>}
+  {screen==='materials'&&<main className="page-wrap materials-wrap">
+   <div className="page-heading">
+    <div className="page-nav-bar">
+     <button type="button" className="back-link" onClick={goHome}><ArrowLeft size={16}/> Kembali ke Beranda</button>
+    </div>
+    <h1>Materi Belajar Santri</h1>
+    <p className="page-sub">Baca satu materi pendek, lihat gambarnya, lalu coba kuis. Kamu boleh belajar bersama guru atau teman.</p>
+   </div>
+   <div className="materials-grid">
+    <article className="material-card material-card-featured">
+     <div className="material-art"><Artwork name="kitab" size={112} bare={true}/><Artwork name="bookcare" size={88} bare={true}/></div>
+     <div className="material-copy"><span className="material-number">MATERI 1</span><h2>Merawat buku belajar</h2><p>Buku membantu kita belajar. Gunakan dengan hati-hati, lalu simpan kembali di tempatnya.</p><div className="material-tip"><b>Ayo lakukan:</b> Setelah membaca, letakkan buku di rak.</div><button className="btn btn-outline material-button" onClick={()=>{update({modes:['guess']});startGame(['guess']);}}>Coba kuis gambar</button></div>
+    </article>
+    <article className="material-card material-card-compact">
+     <div className="material-art"><Artwork name="clean" size={112} bare={true}/></div>
+     <div className="material-copy"><span className="material-number">MATERI 2</span><h2>Menjaga kebersihan</h2><p>Buang sampah ke tempat sampah dan jaga ruang belajar bersama.</p><div className="material-tip"><b>Ayo lakukan:</b> Rapikan satu benda di sekitarmu.</div><button className="btn btn-outline material-button" onClick={()=>{update({modes:['good']});startGame(['good']);}}>Coba kuis adab baik</button></div>
+    </article>
+    <article className="material-card material-card-compact">
+     <div className="material-art"><Artwork name="helping" size={112} bare={true}/></div>
+     <div className="material-copy"><span className="material-number">MATERI 3</span><h2>Saling membantu</h2><p>Tanyakan bantuan apa yang dibutuhkan teman, lalu bantu dengan aman.</p><div className="material-tip"><b>Ayo lakukan:</b> Tawarkan bantuan dengan sopan.</div><button className="btn btn-outline material-button" onClick={()=>{update({modes:['good']});startGame(['good']);}}>Coba kuis adab baik</button></div>
+    </article>
+    <article className="material-card material-card-compact">
+     <div className="material-art"><Artwork name="queue" size={112} bare={true}/></div>
+     <div className="material-copy"><span className="material-number">MATERI 4</span><h2>Menunggu giliran</h2><p>Ketika teman berbicara atau bermain, tunggu sampai giliranmu tiba.</p><div className="material-tip"><b>Ayo lakukan:</b> Dengarkan teman sampai selesai.</div><button className="btn btn-outline material-button" onClick={()=>{update({modes:['good']});startGame(['good']);}}>Coba kuis adab baik</button></div>
+    </article>
+   </div>
+   <div className="materials-footer"><MascotPair/><p><b>Belajar pelan-pelan itu boleh.</b><br/>Pilih satu materi dulu, lalu lanjut saat kamu siap.</p></div>
   </main>}
   {screen==='modes'&&<main className="page-wrap modes-wrap">
    <div className="page-heading">

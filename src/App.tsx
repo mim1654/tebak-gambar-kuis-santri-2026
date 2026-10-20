@@ -27,8 +27,11 @@ function App() {
   const [audioNotice, setAudioNotice] = useState('');
   const [teamStates, setTeamStates] = useState<TeamState[]>([]);
   const [showPresentation, setShowPresentation] = useState(false);
+  const [slideIndex, setSlideIndex] = useState(0);
+  const slideCount = 11;
   const presentationUrl = `${import.meta.env.BASE_URL}materi/PPT_Hari_Santri_Nasional.pptx`;
   const presentationPdfUrl = `${import.meta.env.BASE_URL}materi/PPT_Hari_Santri_Nasional.pdf`;
+  const slideUrl = `${import.meta.env.BASE_URL}materi/slides/slide-${String(slideIndex + 1).padStart(2, '0')}.jpg`;
 
   const available = useMemo(() => (mode === 'match' ? matchingItems : questions).filter((item) => selectedTopics.includes(item.topic)), [mode, selectedTopics]);
   const actualCount = Math.min(count, 50);
@@ -149,7 +152,7 @@ function App() {
       <section className="mode-preview" aria-label="Pilihan permainan"><h2>Pilih cara bermain</h2>{modes.map((item, index) => <article key={item.id}><span className="mode-number">0{index + 1}</span><div><h3>{item.title}</h3><p>{item.description}</p></div></article>)}</section>
     </main>}
 
-    {screen === 'materials' && <main className="page-width subpage"><button className="text-button" onClick={goHome}>Kembali ke beranda</button><h1>Materi singkat tentang santri</h1><p className="intro">Baca bersama. Satu kalimat pendek untuk setiap gambar.</p><section className="presentation-section"><div><h2>Presentasi Hari Santri</h2><p>Slide presentasi ditampilkan langsung di halaman ini. Kamu juga bisa mengunduh berkas PPT aslinya.</p></div><div className="presentation-actions"><button className="button secondary" aria-expanded={showPresentation} onClick={() => setShowPresentation((visible) => !visible)}>{showPresentation ? 'Tutup presentasi' : 'Tampilkan PPT'}</button><a className="button primary" href={presentationUrl} download="PPT_Hari_Santri_Nasional.pptx">Unduh PPT</a></div>{showPresentation && <div className="presentation-viewer"><iframe title="Tayangan slide Hari Santri Nasional" src={presentationPdfUrl} allowFullScreen /><a className="button secondary" href={presentationPdfUrl} download="PPT_Hari_Santri_Nasional.pdf">Unduh PDF</a></div>}</section><div className="materials-list">
+    {screen === 'materials' && <main className="page-width subpage"><button className="text-button" onClick={goHome}>Kembali ke beranda</button><h1>Materi singkat tentang santri</h1><p className="intro">Baca bersama. Satu kalimat pendek untuk setiap gambar.</p><section className="presentation-section"><div><h2>Presentasi Hari Santri</h2><p>Slide presentasi ditampilkan langsung di halaman ini. Kamu juga bisa mengunduh berkas PPT aslinya.</p></div><div className="presentation-actions"><button className="button secondary" aria-expanded={showPresentation} onClick={() => setShowPresentation((visible) => !visible)}>{showPresentation ? 'Tutup presentasi' : 'Tampilkan PPT'}</button><a className="button primary" href={presentationUrl} download="PPT_Hari_Santri_Nasional.pptx">Unduh PPT</a></div>{showPresentation && <div className="presentation-viewer"><img className="presentation-slide" src={slideUrl} alt={`Slide ${slideIndex + 1} dari ${slideCount}: Presentasi Hari Santri Nasional`} /><div className="presentation-controls"><button className="button secondary" onClick={() => setSlideIndex((index) => Math.max(0, index - 1))} disabled={slideIndex === 0}>Sebelumnya</button><p aria-live="polite">Slide {slideIndex + 1} dari {slideCount}</p><button className="button secondary" onClick={() => setSlideIndex((index) => Math.min(slideCount - 1, index + 1))} disabled={slideIndex === slideCount - 1}>Berikutnya</button></div><a className="button secondary" href={presentationPdfUrl} download="PPT_Hari_Santri_Nasional.pdf">Unduh PDF</a></div>}</section><div className="materials-list">
       {[
           ['santri-pair.png','Siapa itu santri?','Santri adalah orang yang belajar agama Islam. Santri belajar bersama guru dan teman.'],
         ['image7.webp','Peci putih','Di PPT, peci putih dikenalkan sebagai pakaian santri laki-laki. Peci dipakai di kepala.'],

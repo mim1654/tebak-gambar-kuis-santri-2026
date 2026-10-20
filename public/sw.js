@@ -1,4 +1,4 @@
-const CACHE = 'kuis-santri-v13';
+const CACHE = 'kuis-santri-v14';
 const CORE = ['./', './index.html', './manifest.webmanifest', './assets/icon.svg'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)).then(() => self.skipWaiting()));

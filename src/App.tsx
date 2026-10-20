@@ -26,6 +26,8 @@ function App() {
   const [sound, setSound] = useState(true);
   const [audioNotice, setAudioNotice] = useState('');
   const [teamStates, setTeamStates] = useState<TeamState[]>([]);
+  const [showPresentation, setShowPresentation] = useState(false);
+  const presentationUrl = `${import.meta.env.BASE_URL}materi/PPT_Hari_Santri_Nasional.pptx`;
 
   const available = useMemo(() => (mode === 'match' ? matchingItems : questions).filter((item) => selectedTopics.includes(item.topic)), [mode, selectedTopics]);
   const actualCount = Math.min(count, 50);
@@ -146,7 +148,7 @@ function App() {
       <section className="mode-preview" aria-label="Pilihan permainan"><h2>Pilih cara bermain</h2>{modes.map((item, index) => <article key={item.id}><span className="mode-number">0{index + 1}</span><div><h3>{item.title}</h3><p>{item.description}</p></div></article>)}</section>
     </main>}
 
-    {screen === 'materials' && <main className="page-width subpage"><button className="text-button" onClick={goHome}>Kembali ke beranda</button><h1>Materi singkat tentang santri</h1><p className="intro">Baca bersama. Satu kalimat pendek untuk setiap gambar.</p><div className="materials-list">
+    {screen === 'materials' && <main className="page-width subpage"><button className="text-button" onClick={goHome}>Kembali ke beranda</button><h1>Materi singkat tentang santri</h1><p className="intro">Baca bersama. Satu kalimat pendek untuk setiap gambar.</p><section className="presentation-section"><div><h2>Presentasi Hari Santri</h2><p>Tampilkan berkas PPT asli langsung di sini, atau unduh untuk dibuka di aplikasi presentasi.</p></div><div className="presentation-actions"><button className="button secondary" aria-expanded={showPresentation} onClick={() => setShowPresentation((visible) => !visible)}>{showPresentation ? 'Tutup presentasi' : 'Tampilkan PPT'}</button><a className="button primary" href={presentationUrl} download="PPT_Hari_Santri_Nasional.pptx">Unduh PPT</a></div>{showPresentation && <div className="presentation-viewer"><iframe title="Presentasi Hari Santri Nasional" src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(`https://mim1654.github.io/tebak-gambar-kuis-santri-2026${presentationUrl}`)}`} allowFullScreen loading="lazy" /><p>Tayangan PPT memerlukan koneksi internet. Jika tidak terbuka, unduh berkas PPT di atas.</p></div>}</section><div className="materials-list">
       {[
           ['santri-pair.png','Siapa itu santri?','Santri adalah orang yang belajar agama Islam. Santri belajar bersama guru dan teman.'],
         ['image7.webp','Peci putih','Di PPT, peci putih dikenalkan sebagai pakaian santri laki-laki. Peci dipakai di kepala.'],
@@ -158,7 +160,6 @@ function App() {
         ['image18.webp','Salat berjemaah','Berwudu, berdiri rapi dalam barisan, lalu mengikuti imam.'],
         ['peci.png','Peci dan sarung','Sebagian santri memakai peci dan sarung. Peci dipakai di kepala. Sarung dipakai menutup tubuh bagian bawah.'],
         ['sajadah.png','Sajadah','Sajadah adalah alas untuk salat. Sajadah digelar di tempat yang bersih.'],
-        ['mukena.png','Mukena','Mukena adalah pakaian salat yang biasa dipakai perempuan Muslim.'],
         ['masjid.png','Tempat ibadah: masjid','Masjid adalah tempat umat Islam beribadah dan salat bersama. Kita menjaga masjid tetap bersih.'],
         ['quran.png','Al-Qur’an dan rehal','Al-Qur’an adalah kitab suci umat Islam. Rehal membantu menyangga Al-Qur’an saat dibaca.'],
         ['books-desk.png','Belajar bersama','Santri belajar bersama guru dan teman. Kita boleh belajar pelan-pelan dan bertanya.'],

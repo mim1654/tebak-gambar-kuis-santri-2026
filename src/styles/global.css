@@ -26,7 +26,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .topbar button:focus-visible { outline-color: var(--gold); }
 img { display: block; max-width: 100%; }
 .app-shell { min-height: 100vh; display: flex; flex-direction: column; }
-.topbar { min-height: 76px; padding: 10px clamp(16px, 4vw, 60px); background: var(--midnight); color: var(--cream); display: flex; align-items: center; justify-content: space-between; gap: 18px; border-bottom: 4px solid var(--gold); }
+.topbar { min-height: 76px; padding: 10px clamp(16px, 4vw, 60px); background-color: var(--midnight); background-image: radial-gradient(circle at 14px 14px, rgb(242 193 78 / 16%) 1.2px, transparent 1.5px); background-size: 32px 32px; color: var(--cream); display: flex; align-items: center; justify-content: space-between; gap: 18px; border-bottom: 4px solid var(--gold); }
 .brand { display: flex; gap: 12px; align-items: center; border: 0; background: transparent; color: var(--cream); font-size: 18px; font-weight: 700; text-align: left; min-height: 48px; padding: 0; }
 .brand img { width: 68px; height: 48px; object-fit: contain; }
 .identity-logos { margin-left: auto; }
@@ -53,7 +53,7 @@ h1 { font-size: clamp(32px, 4.4vw, 58px); line-height: 1.13; letter-spacing: -.0
 .hero-photo.hero-santri img { aspect-ratio: .78; object-fit: contain; animation: santri-float 4s ease-in-out infinite; }
 @keyframes santri-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
 .hero-photo figcaption { padding: 12px 8px 4px; color: var(--ink-soft); font-size: 15px; line-height: 1.45; }
-.mode-preview { margin-top: clamp(38px, 7vw, 88px); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; align-items: stretch; }
+.mode-preview { margin-top: clamp(38px, 7vw, 88px); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; align-items: stretch; }
 .mode-preview h2 { grid-column: 1 / -1; font-size: 24px; align-self: center; margin: 0; }
 .mode-preview article { display: flex; align-items: flex-start; gap: 15px; padding: 20px; background: var(--paper); border: 1px solid var(--line); border-radius: 14px; }
 .mode-number { color: var(--deep); font-size: 21px; font-weight: 800; }
@@ -71,7 +71,7 @@ h1 { font-size: clamp(32px, 4.4vw, 58px); line-height: 1.13; letter-spacing: -.0
 .setup-page { max-width: 1050px; }
 .setup-section { padding: 22px 0; border-bottom: 1px solid var(--line); }
 .setup-section h2 { font-size: 23px; margin-bottom: 14px; }
-.choice-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.choice-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .choice { text-align: left; min-height: 120px; border: 2px solid var(--line); border-radius: 14px; background: var(--paper); padding: 18px; display: grid; align-content: start; gap: 8px; }
 .choice b { font-size: 19px; }
 .choice span { color: var(--ink-soft); line-height: 1.45; }
@@ -103,6 +103,11 @@ select { min-height: 48px; min-width: 120px; padding: 8px 12px; border: 1px soli
 .prompt-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 58px; }
 .prompt-row p { font-size: clamp(18px, 2vw, 24px); line-height: 1.35; font-weight: 700; margin: 0; }
 .answer-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+.typing-answer { display: grid; grid-template-columns: minmax(120px, 240px) 1fr; gap: 10px 18px; align-items: center; margin-top: 16px; }
+.typing-answer .picture { grid-row: span 2; height: clamp(130px, 18vw, 220px); }
+.typing-answer label { font-weight: 700; font-size: 18px; }
+.typing-answer > div { display: flex; gap: 10px; flex-wrap: wrap; }
+.typing-answer input { min-height: 54px; flex: 1 1 180px; min-width: 0; padding: 10px 14px; border: 2px solid var(--deep); border-radius: 10px; background: #fff; font-size: 18px; }
 .answer-card, .match-card { min-width: 0; border: 2px solid var(--line); border-radius: 13px; background: var(--cream); padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 10px; min-height: 150px; font-size: clamp(15px, 1.4vw, 19px); font-weight: 700; text-align: center; }
 .answer-card:hover, .match-card:hover { border-color: var(--blue); background: var(--cream); }
 .picture { width: 100%; height: clamp(90px, 12vw, 155px); object-fit: contain; border-radius: 8px; background: var(--cream); }
@@ -161,6 +166,8 @@ select { min-height: 48px; min-width: 120px; padding: 8px 12px; border: 1px soli
   .material h2 { font-size: 18px; }
   .material p { font-size: 14px; }
   .choice-row { grid-template-columns: 1fr; }
+  .typing-answer { grid-template-columns: 1fr; }
+  .typing-answer .picture { grid-row: auto; width: min(100%, 230px); height: 170px; }
   .setup-controls { align-items: flex-start; flex-direction: column; gap: 14px; }
   .setup-controls label:first-child { flex-wrap: wrap; }
   .team-grid.two-teams { grid-template-columns: 1fr; }

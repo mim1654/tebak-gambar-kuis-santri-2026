@@ -67,6 +67,14 @@ h1 { font-size: clamp(32px, 4.4vw, 58px); line-height: 1.13; letter-spacing: -.0
 .material img { width: 100%; height: 160px; object-fit: contain; background: var(--cream); border-radius: 10px; }
 .material h2 { font-size: 21px; margin: 4px 0 8px; }
 .material p { color: var(--ink-soft); line-height: 1.55; margin-bottom: 10px; }
+.presentation-section { margin: 24px 0; padding: clamp(16px, 3vw, 28px); border: 2px solid var(--gold); border-radius: 16px; background: var(--paper); }
+.presentation-section h2 { margin-bottom: 8px; font-size: 23px; }
+.presentation-section p { color: var(--ink-soft); line-height: 1.5; margin-bottom: 12px; }
+.presentation-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.presentation-actions a { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+.presentation-viewer { margin-top: 20px; }
+.presentation-viewer iframe { display: block; width: 100%; height: min(72vh, 780px); min-height: 420px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+.presentation-viewer p { margin: 10px 0 0; font-size: 14px; }
 .read-button, .listen-button { min-height: 44px; padding: 8px 13px; background: var(--cream); border: 1px solid var(--deep); border-radius: 9px; color: var(--midnight); font-weight: 700; }
 .setup-page { max-width: 1050px; }
 .setup-section { padding: 22px 0; border-bottom: 1px solid var(--line); }

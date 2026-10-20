@@ -48,7 +48,7 @@ describe('alur aplikasi santri', () => {
     click(buttonByText('Kembali ke beranda'));
     click(buttonByText('Mulai bermain'));
     expect(document.body.textContent).toContain('Siapkan permainan');
-    expect(document.querySelectorAll('.choice')).toHaveLength(3);
+    expect(document.querySelectorAll('.choice')).toHaveLength(4);
     expect(document.querySelectorAll('.topic-option')).toHaveLength(4);
   });
 
@@ -131,7 +131,7 @@ describe('alur aplikasi santri', () => {
 
   it('menggabungkan kedua jenis permainan dalam satu sesi', () => {
     startAtSetup();
-    click(buttonByText('Gabungan dua permainan'));
+    click(buttonByText('Gabungan permainan'));
     pickCount('2');
     click(buttonByText('Mulai bermain'));
     expect(document.body.textContent).toContain('Permainan gabungan');
@@ -141,5 +141,20 @@ describe('alur aplikasi santri', () => {
     click([...document.querySelectorAll('.answer-card')].find((card) => card.textContent?.trim() === firstQuestion?.answer) ?? null);
     click(buttonByText('Soal berikutnya'));
     expect(document.querySelectorAll('.match-card')).toHaveLength(4);
+  });
+
+  it('membatasi pilihan sampai 50 soal dan menerima jawaban yang diketik', () => {
+    startAtSetup();
+    click(buttonByText('Ketik nama gambar'));
+    expect(document.querySelectorAll('select option')).toHaveLength(50);
+    pickCount('1');
+    click(buttonByText('Mulai bermain'));
+    const image = document.querySelector('.typing-answer .picture');
+    const question = questions.find((item) => item.alt === image?.getAttribute('alt'));
+    const input = document.querySelector('.typing-answer input');
+    if (!(input instanceof HTMLInputElement) || !question) throw new Error('Soal ketik tidak tampil.');
+    act(() => { const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set; setter?.call(input, question.answer); input.dispatchEvent(new Event('input', { bubbles: true })); });
+    click(buttonByText('Cek jawaban'));
+    expect(document.body.textContent).toContain('Benar! Dapat 1 poin.');
   });
 });

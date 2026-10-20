@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Rehal kayu lipat</title>
+  <defs><linearGradient id="wood" x2="0" y2="1"><stop stop-color="#c9853c"/><stop offset="1" stop-color="#75451f"/></linearGradient><filter id="shadow" x="-.2" y="-.2" width="1.4" height="1.5"><feGaussianBlur stdDeviation="10"/></filter></defs>
+  <ellipse cx="256" cy="424" rx="150" ry="24" fill="#10263a" opacity=".13" filter="url(#shadow)"/>
+  <path d="M112 145 255 198 403 145 256 104Z" fill="#f2c14e" stroke="#75451f" stroke-width="12" stroke-linejoin="round"/>
+  <path d="m112 145 144 53v44L112 189Zm291 0-147 53v44l147-53Z" fill="url(#wood)" stroke="#75451f" stroke-width="10" stroke-linejoin="round"/>
+  <path d="m124 188 133 50 133-50" fill="none" stroke="#e8b66a" stroke-width="8" stroke-linecap="round"/>
+  <path d="m149 195 78 222 47-2-44-207Zm214 0-78 222-47-2 44-207Z" fill="url(#wood)" stroke="#75451f" stroke-width="11" stroke-linejoin="round"/>
+  <path d="m200 326 56-29 57 29-57 28Z" fill="#b56c30" stroke="#75451f" stroke-width="9" stroke-linejoin="round"/>
+  <path d="m133 407 124 6 122-6-13 28H145Z" fill="#75451f" stroke="#603918" stroke-width="8" stroke-linejoin="round"/>
+  <g fill="#f2c14e"><circle cx="135" cy="160" r="6"/><circle cx="378" cy="160" r="6"/><circle cx="256" cy="214" r="6"/></g>
+</svg>

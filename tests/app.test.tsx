@@ -35,20 +35,17 @@ afterEach(() => {
 });
 
 describe('alur aplikasi santri', () => {
-  it('membuka materi, menayangkan slide PPT, lalu menyiapkan kuis', async () => {
+  it('membuka materi, menayangkan slide PPT, lalu menyiapkan kuis', () => {
     click(buttonByText('Suara aktif'));
     expect(buttonByText('Suara mati')).not.toBeNull();
     click(buttonByText('Suara mati'));
     click(buttonByText('Lihat materi'));
     expect(document.body.textContent).toContain('Materi singkat tentang santri');
     expect(document.body.textContent).toContain('Tempat ibadah');
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => 'JVBERi0xLjc=' }));
-    vi.stubGlobal('URL', { createObjectURL: vi.fn(() => 'blob:presentasi'), revokeObjectURL: vi.fn() });
     click(buttonByText('Tampilkan PPT'));
-    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 0)); });
     const slideFrame = document.querySelector('iframe[title="Tayangan slide Hari Santri Nasional"]');
     expect(slideFrame).not.toBeNull();
-    expect(slideFrame?.getAttribute('src')).toBe('blob:presentasi');
+    expect(slideFrame?.getAttribute('src')).toContain('/materi/PPT_Hari_Santri_Nasional.pdf');
     expect(document.querySelector('a[download="PPT_Hari_Santri_Nasional.pptx"]')).not.toBeNull();
     click(buttonByText('Tutup presentasi'));
     expect(document.querySelector('iframe[title="Tayangan slide Hari Santri Nasional"]')).toBeNull();

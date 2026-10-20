@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { matchingItems, modes, questions, topics, type ModeId, type Question, type TopicId } from './data/questions';
 
 type Screen = 'home' | 'materials' | 'setup' | 'game' | 'result';
@@ -27,7 +27,33 @@ function App() {
   const [audioNotice, setAudioNotice] = useState('');
   const [teamStates, setTeamStates] = useState<TeamState[]>([]);
   const [showPresentation, setShowPresentation] = useState(false);
+  const [presentationPdfUrl, setPresentationPdfUrl] = useState('');
+  const [presentationError, setPresentationError] = useState('');
   const presentationUrl = `${import.meta.env.BASE_URL}materi/PPT_Hari_Santri_Nasional.pptx`;
+  const presentationPdfSource = `${import.meta.env.BASE_URL}materi/PPT_Hari_Santri_Nasional.pdf.b64`;
+  useEffect(() => {
+    if (!showPresentation) return;
+    const controller = new AbortController();
+    let objectUrl = '';
+    fetch(presentationPdfSource, { signal: controller.signal })
+      .then((response) => { if (!response.ok) throw new Error('Gagal memuat slide.'); return response.text(); })
+      .then((encoded) => {
+        const binary = atob(encoded.trim());
+        const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+        objectUrl = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+        setPresentationPdfUrl(objectUrl);
+      })
+      .catch((error: unknown) => {
+        if (error instanceof Error && error.name === 'AbortError') return;
+        setPresentationError('Slide belum dapat dimuat. Coba buka atau unduh PPT asli.');
+      });
+    return () => {
+      controller.abort();
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      setPresentationPdfUrl('');
+      setPresentationError('');
+    };
+  }, [showPresentation, presentationPdfSource]);
 
   const available = useMemo(() => (mode === 'match' ? matchingItems : questions).filter((item) => selectedTopics.includes(item.topic)), [mode, selectedTopics]);
   const actualCount = Math.min(count, 50);
@@ -148,7 +174,7 @@ function App() {
       <section className="mode-preview" aria-label="Pilihan permainan"><h2>Pilih cara bermain</h2>{modes.map((item, index) => <article key={item.id}><span className="mode-number">0{index + 1}</span><div><h3>{item.title}</h3><p>{item.description}</p></div></article>)}</section>
     </main>}
 
-    {screen === 'materials' && <main className="page-width subpage"><button className="text-button" onClick={goHome}>Kembali ke beranda</button><h1>Materi singkat tentang santri</h1><p className="intro">Baca bersama. Satu kalimat pendek untuk setiap gambar.</p><section className="presentation-section"><div><h2>Presentasi Hari Santri</h2><p>Tampilkan berkas PPT asli langsung di sini, atau unduh untuk dibuka di aplikasi presentasi.</p></div><div className="presentation-actions"><button className="button secondary" aria-expanded={showPresentation} onClick={() => setShowPresentation((visible) => !visible)}>{showPresentation ? 'Tutup presentasi' : 'Tampilkan PPT'}</button><a className="button primary" href={presentationUrl} download="PPT_Hari_Santri_Nasional.pptx">Unduh PPT</a></div>{showPresentation && <div className="presentation-viewer"><iframe title="Presentasi Hari Santri Nasional" src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(`https://mim1654.github.io/tebak-gambar-kuis-santri-2026${presentationUrl}`)}`} allowFullScreen loading="lazy" /><p>Tayangan PPT memerlukan koneksi internet. Jika tidak terbuka, unduh berkas PPT di atas.</p></div>}</section><div className="materials-list">
+    {screen === 'materials' && <main className="page-width subpage"><button className="text-button" onClick={goHome}>Kembali ke beranda</button><h1>Materi singkat tentang santri</h1><p className="intro">Baca bersama. Satu kalimat pendek untuk setiap gambar.</p><section className="presentation-section"><div><h2>Presentasi Hari Santri</h2><p>Slide presentasi ditampilkan langsung di halaman ini. Kamu juga bisa mengunduh berkas PPT aslinya.</p></div><div className="presentation-actions"><button className="button secondary" aria-expanded={showPresentation} onClick={() => setShowPresentation((visible) => !visible)}>{showPresentation ? 'Tutup presentasi' : 'Tampilkan PPT'}</button><a className="button primary" href={presentationUrl} download="PPT_Hari_Santri_Nasional.pptx">Unduh PPT</a></div>{showPresentation && <div className="presentation-viewer" aria-busy={!presentationPdfUrl && !presentationError}>{presentationPdfUrl ? <><iframe title="Tayangan slide Hari Santri Nasional" src={presentationPdfUrl} allowFullScreen /><a className="button secondary" href={presentationPdfUrl} download="PPT_Hari_Santri_Nasional.pdf">Unduh PDF</a></> : <p role={presentationError ? "alert" : "status"}>{presentationError || "Sedang menyiapkan tayangan slide…"}</p>}</div>}</section><div className="materials-list">
       {[
           ['santri-pair.png','Siapa itu santri?','Santri adalah orang yang belajar agama Islam. Santri belajar bersama guru dan teman.'],
         ['image7.webp','Peci putih','Di PPT, peci putih dikenalkan sebagai pakaian santri laki-laki. Peci dipakai di kepala.'],

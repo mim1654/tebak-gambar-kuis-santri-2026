@@ -43,12 +43,14 @@ describe('alur aplikasi santri', () => {
     expect(document.body.textContent).toContain('Materi singkat tentang santri');
     expect(document.body.textContent).toContain('Tempat ibadah');
     click(buttonByText('Tampilkan PPT'));
-    const slideFrame = document.querySelector('iframe[title="Tayangan slide Hari Santri Nasional"]');
+    const slideFrame = document.querySelector('img[alt^="Slide 1 dari 11"]');
     expect(slideFrame).not.toBeNull();
-    expect(slideFrame?.getAttribute('src')).toContain('/materi/PPT_Hari_Santri_Nasional.pdf');
+    expect(slideFrame?.getAttribute('src')).toContain('/materi/slides/slide-01.jpg');
+    click(buttonByText('Berikutnya'));
+    expect(document.querySelector('img[alt^="Slide 2 dari 11"]')).not.toBeNull();
     expect(document.querySelector('a[download="PPT_Hari_Santri_Nasional.pptx"]')).not.toBeNull();
     click(buttonByText('Tutup presentasi'));
-    expect(document.querySelector('iframe[title="Tayangan slide Hari Santri Nasional"]')).toBeNull();
+    expect(document.querySelector('img[alt^="Slide 2 dari 11"]')).toBeNull();
     expect(document.body.textContent).not.toMatch(/cuci tangan|mencuci tangan/i);
     click(buttonByText('Dengarkan materi'));
     expect(vi.mocked(window.speechSynthesis.speak)).toHaveBeenCalled();

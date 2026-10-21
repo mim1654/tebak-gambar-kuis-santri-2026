@@ -209,3 +209,35 @@ select { min-height: 48px; min-width: 120px; padding: 8px 12px; border: 1px soli
 .song-credit { font-size: 14px; }
 .song-credit a { color: var(--blue); }
 .song-video { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 14px; background: #000; }
+
+/* Layar sentuh besar (TV interaktif) */
+html, body { overscroll-behavior: contain; }
+button, a, select, input, label { touch-action: manipulation; }
+.button, .answer-card, .match-card, .name-button, .choice, .topic-option, .team-option, .sound-toggle { -webkit-user-select: none; user-select: none; }
+img { -webkit-user-drag: none; }
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
+@media (max-width: 700px) { .fullscreen-toggle { display: none; } }
+
+/* Presentasi: geser dan layar penuh */
+.slide-frame { touch-action: pan-y; }
+.slide-hint { color: var(--ink-soft); }
+.slide-overlay { position: fixed; inset: 0; z-index: 1000; display: flex; flex-direction: column; background: #000; color: #fff; }
+.slide-stage { position: relative; flex: 1; min-height: 0; touch-action: none; -webkit-user-select: none; user-select: none; }
+.slide-full { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+.slide-rotate { display: none; position: absolute; top: 8px; left: 0; right: 0; margin: 0; text-align: center; font-size: 14px; color: #fff; text-shadow: 0 1px 3px #000; }
+.slide-bar { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: clamp(8px, 2vw, 24px); padding: 10px clamp(8px, 2vw, 24px); padding-bottom: max(10px, env(safe-area-inset-bottom)); background: #0b1a28; }
+.slide-bar p { margin: 0; min-width: 7.5em; text-align: center; font-weight: 800; font-size: clamp(16px, 2vw, 24px); }
+.slide-btn { min-height: 64px; min-width: 120px; padding: 10px 22px; border: 2px solid #fff; border-radius: 14px; background: transparent; color: #fff; font-weight: 800; font-size: clamp(16px, 1.8vw, 22px); }
+.slide-btn:disabled { opacity: .35; }
+.slide-close { background: var(--gold); border-color: var(--gold); color: var(--midnight); }
+@media (orientation: portrait) and (max-width: 700px) { .slide-rotate { display: block; } }
+@media (max-height: 480px) { .slide-btn { min-height: 48px; min-width: 96px; padding: 6px 14px; } .slide-bar { padding-block: 6px; } }
+
+/* Nama tim */
+.team-names { flex-basis: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.team-names label { display: grid; gap: 6px; font-weight: 700; }
+.team-names input { min-height: 54px; padding: 8px 14px; border: 1px solid var(--deep); border-radius: 10px; background: var(--paper); color: var(--midnight); font: inherit; font-size: 18px; }
+.team-names label:nth-child(1) input { border-left: 7px solid var(--blue); }
+.team-names label:nth-child(2) input { border-left: 7px solid var(--brick); }
+.team-heading h2, .result-scores h2 { overflow-wrap: anywhere; }
+@media (max-width: 540px) { .team-names { grid-template-columns: 1fr; } }

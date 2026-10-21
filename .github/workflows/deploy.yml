@@ -22,7 +22,7 @@ jobs:
           node-version: 22
           cache: npm
       - name: Install dependencies
-        run: npm install
+        run: npm ci
       - name: Test bank soal
         run: npm test
       - name: Build for GitHub Pages

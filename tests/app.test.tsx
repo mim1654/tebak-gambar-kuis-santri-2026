@@ -22,6 +22,8 @@ beforeEach(() => {
   (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
   vi.stubGlobal('SpeechSynthesisUtterance', class { lang = ''; rate = 1; pitch = 1; constructor(readonly text: string) { void text; } });
   vi.stubGlobal('speechSynthesis', { cancel: vi.fn(), speak: vi.fn() });
+  vi.stubGlobal('scrollTo', vi.fn());
+  window.history.replaceState(null, '', '/');
   host = document.createElement('div');
   document.body.append(host);
   root = createRoot(host);
@@ -202,5 +204,135 @@ describe('alur aplikasi santri', () => {
     click(buttons[0]);
     expect(document.querySelector('video')?.getAttribute('src')).toContain('lagu/yalal-wathon.mp4');
     vi.unstubAllGlobals();
+  });
+
+  const openSlideshow = () => {
+    click(buttonByText('Lihat materi'));
+    click(buttonByText('Tampilkan PPT'));
+    click(buttonByText('Slide layar penuh'));
+    const dialog = document.querySelector('[role="dialog"]');
+    if (!dialog) throw new Error('Tampilan layar penuh tidak terbuka.');
+    return dialog;
+  };
+  const pointer = (element: Element, type: string, x: number, y: number) => act(() => { element.dispatchEvent(new MouseEvent(type, { bubbles: true, clientX: x, clientY: y })); });
+  const swipe = (element: Element, fromX: number, toX: number, dy = 0) => { pointer(element, 'pointerdown', fromX, 100); pointer(element, 'pointerup', toX, 100 + dy); };
+  const slideAlt = (scope: ParentNode) => scope.querySelector('img')?.getAttribute('alt') ?? '';
+
+  it('slide layar penuh: tombol, geser, papan ketik, dan menutup', () => {
+    const dialog = openSlideshow();
+    expect(document.body.style.overflow).toBe('hidden');
+    expect(slideAlt(dialog)).toContain('Slide 1 dari 11');
+    const bar = [...dialog.querySelectorAll<HTMLButtonElement>('.slide-bar button')];
+    expect(bar.find((button) => button.textContent === 'Sebelumnya')?.disabled).toBe(true);
+    expect(document.activeElement?.textContent).toBe('Tutup');
+    const stage = dialog.querySelector('.slide-stage') as Element;
+    swipe(stage, 500, 300);
+    expect(slideAlt(dialog)).toContain('Slide 2 dari 11');
+    swipe(stage, 300, 500);
+    expect(slideAlt(dialog)).toContain('Slide 1 dari 11');
+    swipe(stage, 300, 500);
+    expect(slideAlt(dialog)).toContain('Slide 1 dari 11');
+    swipe(stage, 500, 480);
+    swipe(stage, 500, 300, 400);
+    expect(slideAlt(dialog)).toContain('Slide 1 dari 11');
+    click(bar.find((button) => button.textContent === 'Berikutnya') ?? null);
+    act(() => { window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' })); });
+    expect(slideAlt(dialog)).toContain('Slide 3 dari 11');
+    act(() => { window.dispatchEvent(new KeyboardEvent('keydown', { key: 'End' })); });
+    expect(slideAlt(dialog)).toContain('Slide 11 dari 11');
+    expect(bar.find((button) => button.textContent === 'Berikutnya')?.disabled).toBe(true);
+    act(() => { window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' })); });
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    expect(document.body.style.overflow).not.toBe('hidden');
+    expect(document.activeElement?.textContent).toBe('Slide layar penuh');
+    expect(document.querySelector('img[alt^="Slide 11 dari 11"]')).not.toBeNull();
+  });
+
+  it('slide di halaman materi bisa digeser dan tombol Tutup menutup layar penuh', () => {
+    click(buttonByText('Lihat materi'));
+    click(buttonByText('Tampilkan PPT'));
+    swipe(document.querySelector('.slide-frame') as Element, 400, 200);
+    expect(document.querySelector('.presentation-slide')?.getAttribute('alt')).toContain('Slide 2 dari 11');
+    click(buttonByText('Slide layar penuh'));
+    click([...document.querySelectorAll('button')].find((button) => button.textContent === 'Tutup') ?? null);
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+  });
+
+  it('tombol layar penuh aplikasi hanya muncul bila browser mendukung', () => {
+    expect(buttonByText('Layar penuh')).toBeNull();
+    Object.defineProperty(document, 'fullscreenEnabled', { value: true, configurable: true });
+    const request = vi.fn(() => Promise.resolve());
+    document.documentElement.requestFullscreen = request;
+    click(buttonByText('Suara aktif'));
+    click(buttonByText('Layar penuh'));
+    expect(request).toHaveBeenCalled();
+    Reflect.deleteProperty(document, 'fullscreenEnabled');
+    Reflect.deleteProperty(document.documentElement, 'requestFullscreen');
+  });
+
+  const setText = (input: HTMLInputElement, value: string) => act(() => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set?.call(input, value);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  const startTwoTeams = (first: string, second: string) => {
+    startAtSetup();
+    click(document.querySelector('.team-option input'));
+    const [one, two] = [...document.querySelectorAll<HTMLInputElement>('.team-names input')];
+    setText(one, first);
+    setText(two, second);
+    pickCount('1');
+    click(buttonByText('Mulai dua tim'));
+    return [...document.querySelectorAll('.team-panel')];
+  };
+
+  it('nama tim muncul di papan, skor, dan pemenang', () => {
+    const [panelOne, panelTwo] = startTwoTeams('Elang', '  Rajawali ');
+    expect(panelOne.querySelector('.team-heading h2')?.textContent).toContain('Elang');
+    expect(panelTwo.querySelector('.team-heading h2')?.textContent).toContain('Rajawali');
+    const prompt = (panel: Element) => panel.querySelector('.prompt-row p')?.textContent ?? '';
+    const answer = (panel: Element) => questions.find((item) => item.prompt === prompt(panel))?.answer;
+    click([...panelOne.querySelectorAll('.answer-card')].find((card) => card.textContent?.trim() === answer(panelOne)) ?? null);
+    click(panelOne.querySelector('.answer-state button'));
+    const wrongAnswer = answer(panelTwo);
+    for (let tries = 0; tries < 2; tries += 1) click([...panelTwo.querySelectorAll<HTMLButtonElement>('.answer-card')].find((card) => !card.disabled && card.textContent?.trim() !== wrongAnswer) ?? null);
+    click(panelTwo.querySelector('.answer-state button'));
+    expect(document.querySelector('.winner')?.textContent).toBe('Elang mendapat poin lebih banyak.');
+    expect([...document.querySelectorAll('.result-scores h2')].map((heading) => heading.textContent)).toEqual(['Elang', 'Rajawali']);
+  });
+
+  it('nama kosong kembali ke Tim 1 dan Tim 2, nama kembar diberi nomor', () => {
+    const [blankOne, blankTwo] = startTwoTeams('   ', '');
+    expect(blankOne.querySelector('.team-heading h2')?.textContent).toContain('Tim 1');
+    expect(blankTwo.querySelector('.team-heading h2')?.textContent).toContain('Tim 2');
+    click(buttonByText('Pengaturan permainan'));
+    const [one, two] = [...document.querySelectorAll<HTMLInputElement>('.team-names input')];
+    setText(one, 'Singa');
+    setText(two, 'singa');
+    click(buttonByText('Mulai dua tim'));
+    const headings = [...document.querySelectorAll('.team-panel .team-heading h2')].map((heading) => heading.textContent ?? '');
+    expect(headings[0]).toContain('Singa (1)');
+    expect(headings[1]).toContain('singa (2)');
+  });
+
+  it('tombol Back browser kembali ke layar sebelumnya', async () => {
+    click(buttonByText('Lihat materi'));
+    expect(window.location.hash).toBe('#/materials');
+    await act(async () => { window.history.back(); await new Promise((resolve) => setTimeout(resolve, 30)); });
+    expect(window.location.hash).toBe('');
+    expect(buttonByText('Lihat materi')).not.toBeNull();
+    expect(document.body.textContent).not.toContain('Materi singkat tentang santri');
+  });
+
+  it('fokus pindah ke teks soal dan skor diumumkan', () => {
+    startAtSetup();
+    pickCount('2');
+    click(buttonByText('Mulai bermain'));
+    expect(document.activeElement?.closest('.prompt-row')).not.toBeNull();
+    expect(document.querySelector('.team-heading strong')?.getAttribute('aria-live')).toBe('polite');
+  });
+
+  it('gambar merek memakai WebP yang ringan', () => {
+    expect(document.querySelector('.brand img')?.getAttribute('src')).toMatch(/hari-santri-2026\.webp$/);
+    expect(document.querySelector('.hero-santri img')?.getAttribute('src')).toMatch(/santri-pair\.webp$/);
   });
 });

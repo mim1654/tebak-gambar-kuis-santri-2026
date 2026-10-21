@@ -10,13 +10,16 @@ export type Question = {
   choices: string[];
   alt: string;
   hint: string;
+  picks?: Question[];
+  names?: string[];
+  board?: Question[];
 };
 
 export const modes: { id: ModeId; title: string; description: string }[] = [
   { id: 'guess', title: 'Pilih gambar yang benar', description: 'Dengar atau baca pertanyaan, lalu pilih satu dari tiga gambar.' },
   { id: 'match', title: 'Pasangkan dua gambar', description: 'Ketuk satu gambar, lalu ketuk gambar yang sama.' },
-  { id: 'type', title: 'Ketik nama gambar', description: 'Lihat gambar, lalu ketik nama bendanya.' },
-  { id: 'mixed', title: 'Gabungan permainan', description: 'Pilih, pasangkan, dan ketik jawaban bergantian.' },
+  { id: 'type', title: 'Pilih nama gambar', description: 'Lihat gambar, lalu pilih namanya dari tiga pilihan.' },
+  { id: 'mixed', title: 'Gabungan permainan', description: 'Pilih gambar, pasangkan, dan pilih nama bergantian.' },
 ];
 
 export const topics: { id: TopicId; title: string }[] = [
@@ -64,6 +67,7 @@ const reviewPrompts = [
   ['pensil','Pilih pensil untuk menulis.','Ujungnya digunakan untuk membuat tulisan.'],
   ['bedug','Cari bedug besar berbentuk tabung.','Benda ini dipukul hingga berbunyi.'],
 ];
+const reviewTopics: Record<string, TopicId> = { peci: 'perlengkapan', sarung: 'perlengkapan', sajadah: 'perlengkapan', tasbih: 'perlengkapan', mukena: 'perlengkapan', buku: 'belajar', masjid: 'tempat', quran: 'belajar', pensil: 'belajar', bedug: 'perlengkapan' };
 const reviewAnswers = ['Peci','Sarung','Sajadah','Tasbih','Mukena','Buku belajar','Masjid','Al-Qur’an','Pensil','Bedug'];
 for (let index = 0; questions.length < 50; index += 1) {
   const [image, prompt, hint] = reviewPrompts[index % reviewPrompts.length];
@@ -72,7 +76,7 @@ for (let index = 0; questions.length < 50; index += 1) {
   const id = `q${String(questions.length + 1).padStart(2, '0')}`;
   const promptStyle = Math.floor(index / reviewPrompts.length);
   const clearPrompt = [prompt, `Perhatikan petunjuk ini. ${prompt}`, `Dengarkan petunjuk, lalu cari jawabannya. ${prompt}`][promptStyle];
-  questions.push(make(id, index % 3 === 0 ? 'perlengkapan' : index % 3 === 1 ? 'belajar' : 'kegiatan', answer, `${image}.png`, [answer, ...distractors], clearPrompt, hint, answer));
+  questions.push(make(id, reviewTopics[image], answer, `${image}.png`, [answer, ...distractors], clearPrompt, hint, answer));
 }
 
 export const matchingItems = questions;

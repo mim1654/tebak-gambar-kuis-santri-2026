@@ -129,7 +129,7 @@ describe('alur aplikasi santri', () => {
     const secondPanel = document.querySelectorAll('.team-panel')[1];
     const secondPrompt = secondPanel.querySelector('.prompt-row p')?.textContent ?? '';
     const secondQuestion = questions.find((item) => item.prompt === secondPrompt);
-    const chooseWrong = () => click([...secondPanel.querySelectorAll('.answer-card')].find((card) => card.textContent?.trim() !== secondQuestion?.answer) ?? null);
+    const chooseWrong = () => click([...secondPanel.querySelectorAll<HTMLButtonElement>('.answer-card')].find((card) => !card.disabled && card.textContent?.trim() !== secondQuestion?.answer) ?? null);
     chooseWrong();
     chooseWrong();
     expect(secondPanel.textContent).toContain(`Jawabannya: ${secondQuestion?.answer}`);
@@ -152,18 +152,32 @@ describe('alur aplikasi santri', () => {
     expect(document.querySelectorAll('.match-card')).toHaveLength(4);
   });
 
-  it('membatasi pilihan sampai 50 soal dan menerima jawaban yang diketik', () => {
+  it('membatasi pilihan sampai 50 soal dan memakai pilihan nama, bukan ketikan', () => {
     startAtSetup();
-    click(buttonByText('Ketik nama gambar'));
+    click(buttonByText('Pilih nama gambar'));
     expect(document.querySelectorAll('select option')).toHaveLength(50);
     pickCount('1');
     click(buttonByText('Mulai bermain'));
-    const image = document.querySelector('.typing-answer .picture');
+    expect(document.querySelector('input[type="text"], .name-answer input')).toBeNull();
+    const image = document.querySelector('.name-answer .picture');
     const question = questions.find((item) => item.alt === image?.getAttribute('alt'));
-    const input = document.querySelector('.typing-answer input');
-    if (!(input instanceof HTMLInputElement) || !question) throw new Error('Soal ketik tidak tampil.');
-    act(() => { const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set; setter?.call(input, question.answer); input.dispatchEvent(new Event('input', { bubbles: true })); });
-    click(buttonByText('Cek jawaban'));
+    const names = [...document.querySelectorAll<HTMLButtonElement>('.name-button')];
+    expect(names).toHaveLength(3);
+    expect(document.querySelectorAll('.name-choice .listen-button')).toHaveLength(3);
+    click(names.find((button) => button.textContent === question?.answer) ?? null);
     expect(document.body.textContent).toContain('Benar! Dapat 1 poin.');
+  });
+
+  it('menonaktifkan pilihan nama yang sudah salah dan menampilkan petunjuk', () => {
+    startAtSetup();
+    click(buttonByText('Pilih nama gambar'));
+    pickCount('1');
+    click(buttonByText('Mulai bermain'));
+    const image = document.querySelector('.name-answer .picture');
+    const question = questions.find((item) => item.alt === image?.getAttribute('alt'));
+    const wrong = [...document.querySelectorAll<HTMLButtonElement>('.name-button')].find((button) => button.textContent !== question?.answer);
+    click(wrong ?? null);
+    expect(wrong?.disabled).toBe(true);
+    expect(document.body.textContent).toContain('Petunjuk:');
   });
 });

@@ -15,6 +15,11 @@ describe('bank soal belajar santri', () => {
     expect(matchingItems.length).toBeGreaterThanOrEqual(4);
   });
 
+  it('setiap topik punya cukup kartu dan topik soal tambahan sesuai gambarnya', () => {
+    for (const topic of topics) expect(questions.filter((question) => question.topic === topic.id).length).toBeGreaterThanOrEqual(4);
+    expect(questions.filter((question) => question.image === 'masjid.png').every((question) => question.topic === 'tempat')).toBe(true);
+  });
+
   it('memuat topik santri saja dan setiap soal memiliki petunjuk serta aset', () => {
     expect(topics.map((topic) => topic.id)).toEqual(['perlengkapan', 'tempat', 'belajar', 'kegiatan']);
     for (const question of questions) {

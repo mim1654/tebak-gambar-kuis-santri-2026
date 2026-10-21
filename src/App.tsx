@@ -1,17 +1,14 @@
 import { useMemo, useState } from 'react';
 import { matchingItems, modes, questions, topics, type ModeId, type Question, type TopicId } from './data/questions';
+import { buildDeck } from './lib/deck';
 
 type Screen = 'home' | 'materials' | 'setup' | 'game' | 'result';
-type TeamState = { index: number; score: number; mistakes: number; selected: string[]; matched: string[]; typedAnswer: string; status: 'ready' | 'retry' | 'revealed' | 'done' | 'finished'; deck: Question[] };
+type TeamState = { index: number; score: number; mistakes: number; selected: string[]; matched: string[]; wrong: string[]; status: 'ready' | 'retry' | 'revealed' | 'done' | 'finished'; deck: Question[] };
 const brandImages = new Set(['hari-santri-2026.png', 'plp.png', 'santri-pair.png']);
 const pptImages = new Set(['image7.webp','image8.webp','image9.webp','image11.webp','image16.webp','image17.webp','image18.webp','image23.webp']);
 const imageUrl = (name: string) => `${import.meta.env.BASE_URL}images/${brandImages.has(name) ? 'brand' : pptImages.has(name) ? 'ppt' : 'quiz'}/${name}`;
-const buildTeam = (deck: Question[]): TeamState => ({ index: 0, score: 0, mistakes: 0, selected: [], matched: [], typedAnswer: '', status: 'ready', deck });
-const getChoiceSet = (question: Question) => {
-  const candidates = questions.filter((item, index, all) => item.answer !== question.answer && item.image !== question.image && all.findIndex((candidate) => candidate.answer === item.answer || candidate.image === item.image) === index);
-  const offset = Number(question.id.slice(1).split('-')[0]) % candidates.length;
-  return [question, candidates[offset], candidates[(offset + 1) % candidates.length]];
-};
+const buildTeam = (deck: Question[]): TeamState => ({ index: 0, score: 0, mistakes: 0, selected: [], matched: [], wrong: [], status: 'ready', deck });
+const promptFor = (question: Question) => (question.mode === 'type' ? 'Apa nama gambar ini?' : question.prompt);
 
 function Picture({ question, className = '' }: { question: Question; className?: string }) {
   return <img className={`picture ${className}`} src={imageUrl(question.image)} alt={question.alt} loading="lazy" />;
@@ -57,10 +54,7 @@ function App() {
 
   const startGame = () => {
     if (available.length === 0) return;
-    const decks = Array.from({ length: teams ? 2 : 1 }, () => Array.from({ length: actualCount }, (_, index) => {
-      const question = available[index % available.length];
-      return mode === 'mixed' ? { ...question, id: `${question.id}-${index}`, mode: (['guess','match','type'] as const)[index % 3] } : { ...question, id: `${question.id}-${index}`, mode: mode === 'match' ? 'match' as const : mode === 'type' ? 'type' as const : 'guess' as const };
-    }));
+    const decks = Array.from({ length: teams ? 2 : 1 }, () => buildDeck(available, actualCount, mode, questions));
     setTeamStates(decks.map(buildTeam));
     setScreen('game');
   };
@@ -68,34 +62,22 @@ function App() {
   const nextQuestion = (teamIndex: number) => {
     setTeamStates((old) => old.map((team, index) => index !== teamIndex ? team : team.index + 1 >= team.deck.length
       ? { ...team, status: 'finished', selected: [], matched: [] }
-      : { ...team, index: team.index + 1, mistakes: 0, selected: [], matched: [], typedAnswer: '', status: 'ready' }));
+      : { ...team, index: team.index + 1, mistakes: 0, selected: [], matched: [], wrong: [], status: 'ready' }));
   };
 
   const chooseAnswer = (teamIndex: number, value: string) => {
     const current = teamStates[teamIndex];
-    if (!current || current.status === 'done' || current.status === 'revealed') return;
+    if (!current || current.status === 'done' || current.status === 'revealed' || current.wrong.includes(value)) return;
     const question = current.deck[current.index];
     if (value === question.answer) {
       setTeamStates((old) => old.map((team, index) => index !== teamIndex ? team : { ...team, score: team.score + (team.mistakes === 0 ? 1 : 0), status: 'done' }));
       say(['Hore! Kamu berhasil!','Hebat! Jawabanmu benar!','Masya Allah, bagus sekali!'][Math.floor(Math.random() * 3)]);
     } else {
       const mistakes = current.mistakes + 1;
-      setTeamStates((old) => old.map((team, index) => index !== teamIndex ? team : { ...team, mistakes, status: mistakes >= 2 ? 'revealed' : 'retry' }));
+      setTeamStates((old) => old.map((team, index) => index !== teamIndex ? team : { ...team, mistakes, wrong: [...team.wrong, value], status: mistakes >= 2 ? 'revealed' : 'retry' }));
       say(mistakes >= 2 ? `Jawabannya ${question.answer}. Kita lanjut.` : 'Belum tepat. Coba sekali lagi.');
     }
   };
-
-  const typeAnswer = (teamIndex: number) => {
-    const current = teamStates[teamIndex];
-    if (!current) return;
-    const entered = current.typedAnswer.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('id').replace(/[^a-z0-9]/g, '');
-    const answer = current.deck[current.index].answer.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('id').replace(/[^a-z0-9]/g, '');
-    const aliases: Record<string, string[]> = { 'bukubelajar':['buku'], 'al-quran':['alquran','quran'], 'kitabpelajaran':['kitab'] };
-    if (entered === answer || (aliases[answer] ?? []).includes(entered)) chooseAnswer(teamIndex, current.deck[current.index].answer);
-    else chooseAnswer(teamIndex, current.typedAnswer);
-  };
-
-  const changeTypedAnswer = (teamIndex: number, value: string) => setTeamStates((old) => old.map((team, index) => index === teamIndex ? { ...team, typedAnswer: value } : team));
 
   const tapMatch = (teamIndex: number, itemId: string) => {
     const state = teamStates[teamIndex];
@@ -106,14 +88,13 @@ function App() {
       return;
     }
     const [firstId, secondId] = selected;
-    const activeQuestion = state.deck[state.index];
-    const board = [activeQuestion, ...matchingItems.filter((item) => item.image !== activeQuestion.image).slice(0, 1)];
-    const first = board.find((item) => item.id === firstId.split(':')[0]);
-    const second = board.find((item) => item.id === secondId.split(':')[0]);
+    const board = state.deck[state.index].board ?? [];
+    const first = board[Number(firstId.split(':')[1])];
+    const second = board[Number(secondId.split(':')[1])];
     const correct = Boolean(first && second && first.id === second.id);
     if (correct) {
       const matched = [...state.matched, firstId, secondId];
-      const targetPairs = 2;
+      const targetPairs = board.length / 2;
       if (matched.length >= targetPairs * 2) {
         setTeamStates((old) => old.map((team, index) => index !== teamIndex ? team : { ...team, matched, selected: [], score: team.score + (team.mistakes === 0 ? 1 : 0), status: 'done' }));
         say('Hebat, semua pasangan cocok.');
@@ -179,13 +160,13 @@ function App() {
       <button className="button primary start-button" disabled={!selectedTopics.length || !available.length} onClick={startGame}>Mulai {teams ? 'dua tim' : 'bermain'}</button>
     </main>}
 
-    {screen === 'game' && <main className="page-width game-page"><div className="game-heading"><button className="text-button" onClick={() => setScreen('setup')}>Pengaturan permainan</button><h1>{mode === 'mixed' ? 'Permainan gabungan' : mode === 'guess' ? 'Pilih gambar yang benar' : mode === 'type' ? 'Ketik nama gambar' : 'Pasangkan dua gambar'}</h1><p>{teams ? 'Dua tim bermain pada saat yang sama. Gunakan papan Tim 1 dan Tim 2; skor masing-masing terlihat di atas papan.' : mode === 'mixed' ? 'Pilih, pasangkan, dan ketik jawaban secara bergantian.' : 'Tidak ada batas waktu. Boleh mencoba lagi.'}</p></div>
+    {screen === 'game' && <main className="page-width game-page"><div className="game-heading"><button className="text-button" onClick={() => setScreen('setup')}>Pengaturan permainan</button><h1>{mode === 'mixed' ? 'Permainan gabungan' : mode === 'guess' ? 'Pilih gambar yang benar' : mode === 'type' ? 'Pilih nama gambar' : 'Pasangkan dua gambar'}</h1><p>{teams ? 'Dua tim bermain pada saat yang sama. Gunakan papan Tim 1 dan Tim 2; skor masing-masing terlihat di atas papan.' : mode === 'mixed' ? 'Pilih, pasangkan, dan pilih nama secara bergantian.' : 'Tidak ada batas waktu. Boleh mencoba lagi.'}</p></div>
       <div className={`team-grid ${teams ? 'two-teams' : ''}`}>{teamStates.map((state, teamIndex) => { const question = state.deck[state.index]; const activeMode = question.mode; const teamName = teams ? `Tim ${teamIndex + 1}` : 'Giliranmu'; return <section className={`team-panel team-${teamIndex + 1}`} key={teamIndex} aria-label={teamName}>
         <div className="team-heading"><h2>{teamName}<small>Soal {state.index + 1} dari {state.deck.length}</small></h2><strong>{state.score} poin</strong></div>
         {state.status === 'finished' ? <div className="answer-state" role="status"><p className="status-message">Selesai. Skor {state.score} poin.</p>{allDone && <button className="button primary" onClick={() => setScreen('result')}>Lihat hasil</button>}</div> : state.status === 'done' || state.status === 'revealed' ? <div className="answer-state" role="status"><p className="status-message">{state.status === 'done' ? (state.mistakes === 0 ? 'Benar! Dapat 1 poin.' : 'Jawaban benar. Kamu sudah mencoba, soal berikutnya!') : `Jawabannya: ${question.answer}. Kita lanjut.`}</p><button className="button primary" onClick={() => finishOrContinue(teamIndex)}>{allDone ? 'Lihat hasil' : 'Soal berikutnya'}</button></div> : <>
-          <div className="current-game-label">{activeMode === 'guess' ? 'Pilih gambar' : activeMode === 'type' ? 'Ketik jawaban' : 'Pasangkan gambar'}</div><div className="prompt-row"><p>{activeMode === 'guess' || activeMode === 'type' ? question.prompt : 'Ketuk gambar pertama, lalu ketuk pasangannya.'}</p><button className="listen-button" onClick={() => say(activeMode === 'guess' || activeMode === 'type' ? question.prompt : 'Ketuk gambar pertama, lalu ketuk gambar yang sama.')}>Dengarkan</button></div>
-          {activeMode === 'guess' ? <div className="answer-grid">{getChoiceSet(question).map((item, optionIndex) => <button key={`${item.id}-${optionIndex}`} className="answer-card" onClick={() => chooseAnswer(teamIndex, item.answer)} aria-label={`Pilih gambar ${item.alt}`}><Picture question={item} /><span>{item.answer}</span></button>)}</div> : activeMode === 'type' ? <div className="typing-answer"><Picture question={question} /><label htmlFor={`answer-${teamIndex}`}>Ketik nama gambar</label><div><input id={`answer-${teamIndex}`} value={state.typedAnswer} onChange={(event) => changeTypedAnswer(teamIndex, event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') typeAnswer(teamIndex); }} autoComplete="off" /><button className="button primary" onClick={() => typeAnswer(teamIndex)}>Cek jawaban</button></div></div> : <div className="match-grid">{[question, ...matchingItems.filter((item) => item.image !== question.image).slice(0, 1)].flatMap((item) => [0, 1].map((copy) => <button key={`${item.id}-${copy}`} className={`match-card ${state.selected.includes(`${item.id}:${copy}`) ? 'is-selected' : ''} ${state.matched.includes(`${item.id}:${copy}`) ? 'is-matched' : ''}`} onClick={() => tapMatch(teamIndex, `${item.id}:${copy}`)} aria-label={`Kartu gambar ${item.alt}`}><Picture question={item} /><span>{item.answer}</span></button>))}</div>}
-          {state.status === 'retry' && <p className="try-message" role="status">Belum tepat. Kamu boleh mencoba sekali lagi.</p>}
+          <div className="current-game-label">{activeMode === 'guess' ? 'Pilih gambar' : activeMode === 'type' ? 'Pilih nama' : 'Pasangkan gambar'}</div><div className="prompt-row"><p>{activeMode === 'guess' || activeMode === 'type' ? promptFor(question) : 'Ketuk gambar pertama, lalu ketuk pasangannya.'}</p><button className="listen-button" onClick={() => say(activeMode === 'guess' || activeMode === 'type' ? promptFor(question) : 'Ketuk gambar pertama, lalu ketuk gambar yang sama.')}>Dengarkan</button></div>
+          {activeMode === 'guess' ? <div className="answer-grid">{(question.picks ?? []).map((item, optionIndex) => <button key={`${item.id}-${optionIndex}`} className="answer-card" disabled={state.wrong.includes(item.answer)} onClick={() => chooseAnswer(teamIndex, item.answer)} aria-label={`Pilih gambar ${item.alt}`}><Picture question={item} /><span>{item.answer}</span></button>)}</div> : activeMode === 'type' ? <div className="name-answer"><Picture question={question} /><div className="name-list">{(question.names ?? []).map((name) => <div className="name-choice" key={name}><button className="name-button" disabled={state.wrong.includes(name)} onClick={() => chooseAnswer(teamIndex, name)}>{name}</button><button className="listen-button" onClick={() => say(name)} aria-label={`Dengarkan ${name}`}>Dengarkan</button></div>)}</div></div> : <div className="match-grid">{(question.board ?? []).map((item, position) => { const cardId = `${item.id}:${position}`; return <button key={cardId} className={`match-card ${state.selected.includes(cardId) ? 'is-selected' : ''} ${state.matched.includes(cardId) ? 'is-matched' : ''}`} onClick={() => tapMatch(teamIndex, cardId)} aria-label={`Kartu gambar ${item.alt}`}><Picture question={item} /><span>{item.answer}</span></button>; })}</div>}
+          {state.status === 'retry' && <p className="try-message" role="status">Belum tepat. Kamu boleh mencoba sekali lagi.{activeMode !== 'match' && question.hint ? ` Petunjuk: ${question.hint}` : ''}</p>}
           <p className="score-rule">Jawaban benar pada percobaan pertama mendapat 1 poin. Jawaban salah tidak mengurangi poin.</p>
         </>}
       </section>; })}</div>

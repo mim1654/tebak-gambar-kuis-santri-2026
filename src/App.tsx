@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
 import { matchingItems, modes, questions, topics, type ModeId, type Question, type TopicId } from './data/questions';
+import Songs from './components/Songs';
 import { buildDeck } from './lib/deck';
 
-type Screen = 'home' | 'materials' | 'setup' | 'game' | 'result';
+type Screen = 'home' | 'materials' | 'songs' | 'setup' | 'game' | 'result';
 type TeamState = { index: number; score: number; mistakes: number; selected: string[]; matched: string[]; wrong: string[]; status: 'ready' | 'retry' | 'revealed' | 'done' | 'finished'; deck: Question[] };
 const brandImages = new Set(['hari-santri-2026.png', 'plp.png', 'santri-pair.png']);
 const pptImages = new Set(['image7.webp','image8.webp','image9.webp','image11.webp','image16.webp','image17.webp','image18.webp','image23.webp']);
@@ -126,7 +127,7 @@ function App() {
     {screen === 'home' && <main className="home page-width">
       <section className="welcome">
         <div className="welcome-copy"><p className="eyebrow">Belajar Hari Santri</p><h1>Kenali kehidupan santri, satu gambar setiap kali.</h1><p className="intro">Permainan sederhana dengan gambar benda yang jelas, tombol besar, dan petunjuk suara yang lembut. Main bersama guru atau dua tim di satu layar sentuh.</p>
-          <div className="actions"><button className="button primary" onClick={() => setScreen('setup')}>Mulai bermain</button><button className="button secondary" onClick={() => setScreen('materials')}>Lihat materi</button></div>
+          <div className="actions"><button className="button primary" onClick={() => setScreen('setup')}>Mulai bermain</button><button className="button secondary" onClick={() => setScreen('materials')}>Lihat materi</button><button className="button secondary" onClick={() => setScreen('songs')}>Lagu santri</button></div>
           <p className="short-note">Tidak ada batas waktu. Boleh mendengar, membaca, dan mencoba lagi.</p></div>
       <figure className="hero-photo hero-santri"><img src={imageUrl('santri-pair.png')} alt="Anak santri laki-laki dan perempuan menyapa dengan ramah" /><figcaption>Belajar dan beribadah bersama teman.</figcaption></figure>
       </section>
@@ -153,6 +154,7 @@ function App() {
       ].map(([image, title, copy]) => <article className="material" key={title}><img src={imageUrl(image)} alt={title} loading="lazy" /><div><h2>{title}</h2><p>{copy}</p><button className="read-button" onClick={() => say(copy)}>Dengarkan materi</button></div></article>)}
     </div></main>}
 
+    {screen === 'songs' && <Songs onBack={goHome} />}
     {screen === 'setup' && <main className="page-width subpage setup-page"><button className="text-button" onClick={goHome}>Kembali ke beranda</button><h1>Siapkan permainan</h1><p className="intro">Pilih cara bermain, materi, dan jumlah soal. Pengaturan bisa dibacakan.</p><button className="read-button" onClick={() => say('Pilih satu cara bermain, materi, jumlah soal, lalu pilih bermain sendiri atau dua tim.')}>Dengarkan petunjuk</button>
       <section className="setup-section"><h2>1. Cara bermain</h2><div className="choice-row">{modes.map((item) => <button key={item.id} className={`choice ${mode === item.id ? 'chosen' : ''}`} aria-pressed={mode === item.id} onClick={() => setMode(item.id)}><b>{item.title}</b><span>{item.description}</span></button>)}</div></section>
       <section className="setup-section"><h2>2. Pilih materi</h2><div className="topic-list">{topics.map((topic) => <label key={topic.id} className="topic-option"><input type="checkbox" checked={selectedTopics.includes(topic.id)} onChange={(event) => setSelectedTopics((old) => event.target.checked ? [...old, topic.id] : old.filter((id) => id !== topic.id))} /><span>{topic.title}</span></label>)}</div></section>

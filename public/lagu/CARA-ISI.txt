@@ -1,0 +1,12 @@
+Folder ini untuk video lagu (opsional).
+
+Nama file yang dicari halaman "Lagu santri":
+  yalal-wathon.mp4   -> Mars Syubbanul Wathon
+  hari-santri.mp4    -> Hari Santri 22 Oktober 45
+
+Syarat: MP4 (H.264 + AAC), 480p atau 720p, maksimal 20 MB per file.
+Kompres dengan HandBrake, preset "Fast 720p30".
+Upload lewat browser GitHub dibatasi 25 MB per file.
+
+Kalau file belum ada, tombol "Putar video di web" nonaktif dan
+tombol YouTube tetap bisa dipakai. Hapus file ini bila sudah tidak perlu.

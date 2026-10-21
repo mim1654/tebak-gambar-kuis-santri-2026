@@ -180,4 +180,27 @@ describe('alur aplikasi santri', () => {
     expect(wrong?.disabled).toBe(true);
     expect(document.body.textContent).toContain('Petunjuk:');
   });
+
+  it('membuka halaman lagu dan memuat YouTube hanya setelah ditekan', () => {
+    click(buttonByText('Lagu santri'));
+    expect(document.body.textContent).toContain('Mars Syubbanul Wathon');
+    expect(document.body.textContent).toContain('Hari Santri 22 Oktober 45');
+    expect(document.querySelector('iframe')).toBeNull();
+    const links = [...document.querySelectorAll<HTMLAnchorElement>('a')].filter((link) => link.textContent === 'Buka di YouTube');
+    expect(links.map((link) => link.href)).toEqual(['https://youtu.be/q-jLfOBVxrw', 'https://youtu.be/mMaE4Ll7VMo']);
+    click(buttonByText('Putar dari YouTube'));
+    expect(document.querySelector('iframe')?.getAttribute('src')).toContain('youtube-nocookie.com/embed/q-jLfOBVxrw');
+  });
+
+  it('video di web aktif hanya bila filenya ada', async () => {
+    vi.stubGlobal('fetch', vi.fn((url: string) => Promise.resolve(url.includes('yalal-wathon') ? { ok: true, headers: { get: () => 'video/mp4' } } : { ok: false, headers: { get: () => 'text/html' } })));
+    click(buttonByText('Lagu santri'));
+    await act(async () => { await Promise.resolve(); });
+    const buttons = [...document.querySelectorAll<HTMLButtonElement>('button')].filter((button) => button.textContent === 'Putar video di web');
+    expect(buttons.map((button) => button.disabled)).toEqual([false, true]);
+    expect(document.body.textContent).toContain('Video di web belum tersedia.');
+    click(buttons[0]);
+    expect(document.querySelector('video')?.getAttribute('src')).toContain('lagu/yalal-wathon.mp4');
+    vi.unstubAllGlobals();
+  });
 });
